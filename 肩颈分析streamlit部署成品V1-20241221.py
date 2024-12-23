@@ -217,6 +217,9 @@ if uploaded_file is not None:
         model = load(local_model_path_joblib)
         return model
         st.write("成功加载模型。")
+
+        # 调用模型加载函数
+    model = load_model_from_github()
         
     # 主程序
     if uploaded_file is not None:
@@ -236,9 +239,6 @@ if uploaded_file is not None:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
         y_pred = model.predict(X_test)
         y_prob = model.predict_proba(X_test)[:, 1]
-    
-    # 调用模型加载函数
-    model = load_model_from_github()
         
     # 调用函数生成图和结论
     analyze_data(data)
