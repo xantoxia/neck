@@ -216,6 +216,15 @@ if uploaded_file is not None:
         model.fit(X_train, y_train)
         dump(model, model_file)
         st.write(f"模型已保存：{model_file}")
+
+    # 提供下载按钮
+    with open(model_file, "rb") as f:
+        st.download_button(
+            label="下载训练好的模型文件",
+            data=f,
+            file_name=model_file,
+            mime="application/octet-stream"
+        )
         
     # 调用函数生成图和结论
     analyze_data(data)
