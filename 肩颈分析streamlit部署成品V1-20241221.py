@@ -197,7 +197,7 @@ if uploaded_file is not None:
         return abnormal_indices
   
     # 机器学习
-    model_file = '肩颈分析-机器学习版模型.joblib'
+    model_file = '/tmp/肩颈分析-机器学习版模型.joblib'
 
     if os.path.exists(model_file):
         model = load(model_file)
