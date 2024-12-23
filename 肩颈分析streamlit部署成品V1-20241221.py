@@ -218,11 +218,24 @@ if uploaded_file is not None:
         return model
         st.write("成功加载模型。")
         
+    # 主程序
+    if uploaded_file is not None:
+        data = pd.read_csv(uploaded_file)
+        data.columns = ['天(d)', '时间(s)', '颈部角度(°)', '肩部上举角度(°)', 
+                        '肩部外展/内收角度(°)', '肩部旋转角度(°)']
+    
         X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
         if 'Label' not in data.columns:
             np.random.seed(42)
             data['Label'] = np.random.choice([0, 1], size=len(data))
         y = data['Label']
+
+        model = load_model_from_github()
+        
+        # 模型评估
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        y_pred = model.predict(X_test)
+        y_prob = model.predict_proba(X_test)[:, 1]
     
     # 调用模型加载函数
     model = load_model_from_github()
