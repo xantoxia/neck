@@ -198,27 +198,27 @@ if uploaded_file is not None:
         return abnormal_indices
   
     # 机器学习
-    def load_model_from_github():
-        model_url = "https://github.com/xantoxia/neck/releases/download/v1.0/肩颈分析-机器学习版模型.txt"
-        local_model_path = "肩颈分析-机器学习版模型.txt"
+def load_model_from_github():
+    # 模型文件的 GitHub URL
+    model_url = "https://github.com/xantoxia/neck/releases/download/v1.0/肩颈分析-机器学习版模型.txt"
+    local_model_path_txt = "肩颈分析-机器学习版模型.txt"  # 下载时的临时文件名
+    local_model_path_joblib = "肩颈分析-机器学习版模型.joblib"  # 最终需要加载的模型文件名
 
-        X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
-        if 'Label' not in data.columns:
-            np.random.seed(42)
-            data['Label'] = np.random.choice([0, 1], size=len(data))
-        y = data['Label']
+    # 下载模型文件
+    if not os.path.exists(local_model_path_joblib):  # 如果模型未保存，则从 GitHub 下载
+        response = requests.get(model_url)
+        with open(local_model_path_txt, 'wb') as f:
+            f.write(response.content)
 
-        # 下载模型文件
-        if not os.path.exists(local_model_path):
-            response = requests.get(model_url)
-            with open(local_model_path, 'wb') as f:
-                f.write(response.content)
+        # 将 .txt 文件重命名为 .joblib 文件
+        os.rename(local_model_path_txt, local_model_path_joblib)
 
-        # 加载模型
-        return load(local_model_path)
+    # 加载模型
+    model = load(local_model_path_joblib)
+    return model
 
-        # 使用模型
-        model = load_model_from_github()
+# 调用模型加载函数
+model = load_model_from_github()
         
     # 调用函数生成图和结论
     analyze_data(data)
