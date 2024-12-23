@@ -9,13 +9,14 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
+import requests
 import streamlit as st
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, auc
 from joblib import dump, load
 from matplotlib import font_manager
-import os
 
 # 设置中文字体
 simhei_font = font_manager.FontProperties(fname="simhei.ttf")
@@ -197,13 +198,9 @@ if uploaded_file is not None:
         return abnormal_indices
   
     # 机器学习
-    model_file = '/tmp/肩颈分析-机器学习版模型.joblib'
-
-    if os.path.exists(model_file):
-        model = load(model_file)
-        st.write("加载已有模型。")
-    else:
-        model = RandomForestClassifier(random_state=42)
+    def load_model_from_github():
+        model_url = "https://github.com/xantoxia/neck/releases/download/v1.0/肩颈分析-机器学习版模型.txt"
+        local_model_path = "model.joblib"
 
     X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
     if 'Label' not in data.columns:
@@ -211,11 +208,17 @@ if uploaded_file is not None:
         data['Label'] = np.random.choice([0, 1], size=len(data))
     y = data['Label']
       
-    if not os.path.exists(model_file):
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-        model.fit(X_train, y_train)
-        dump(model, model_file)
-        st.write(f"模型已保存：{model_file}")
+        # 下载模型文件
+        if not os.path.exists(local_model_path):
+            response = requests.get(model_url)
+            with open(local_model_path, 'wb') as f:
+                f.write(response.content)
+        # 加载模型
+        model = load(local_model_path)
+        return model
+
+    # 使用模型
+    model = load_model_from_github()
         
     # 调用函数生成图和结论
     analyze_data(data)
