@@ -215,7 +215,7 @@ if uploaded_file is not None:
                 f.write(response.content)
         # 加载模型
     model = load(local_model_path)
-     return model
+        return model
 
     # 使用模型
     model = load_model_from_github()
