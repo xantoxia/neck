@@ -202,11 +202,11 @@ if uploaded_file is not None:
         model_url = "https://github.com/xantoxia/neck/releases/download/v1.0/肩颈分析-机器学习版模型.txt"
         local_model_path = "model.joblib"
 
-    X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
-    if 'Label' not in data.columns:
-        np.random.seed(42)
-        data['Label'] = np.random.choice([0, 1], size=len(data))
-    y = data['Label']
+        X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
+        if 'Label' not in data.columns:
+            np.random.seed(42)
+            data['Label'] = np.random.choice([0, 1], size=len(data))
+        y = data['Label']
       
         # 下载模型文件
         if not os.path.exists(local_model_path):
