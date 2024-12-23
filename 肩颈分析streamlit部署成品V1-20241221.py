@@ -223,8 +223,8 @@ def load_model_from_github():
         data['Label'] = np.random.choice([0, 1], size=len(data))
     y = data['Label']
       
-# 调用模型加载函数
-model = load_model_from_github()
+    # 调用模型加载函数
+    model = load_model_from_github()
         
     # 调用函数生成图和结论
     analyze_data(data)
