@@ -213,15 +213,17 @@ def load_model_from_github():
         # 将 .txt 文件重命名为 .joblib 文件
         os.rename(local_model_path_txt, local_model_path_joblib)
 
-    # 加载模型
-    model = load(local_model_path_joblib)
-    return model
-    
     X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
     if 'Label' not in data.columns:
         np.random.seed(42)
         data['Label'] = np.random.choice([0, 1], size=len(data))
     y = data['Label']
+    
+    # 加载模型
+    model = load(local_model_path_joblib)
+    return model
+    
+
       
     # 调用模型加载函数
     model = load_model_from_github()
