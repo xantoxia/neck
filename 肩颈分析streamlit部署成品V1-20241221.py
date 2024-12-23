@@ -210,16 +210,7 @@ if uploaded_file is not None:
         np.random.seed(42)
         data['Label'] = np.random.choice([0, 1], size=len(data))
     y = data['Label']
-
-    # 提供下载按钮
-    with open(model_file, "rb") as f:
-        st.download_button(
-            label="下载训练好的模型文件",
-            data=f,
-            file_name=model_file,
-            mime="application/octet-stream"
-         )
-        
+      
     if not os.path.exists(model_file):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
         model.fit(X_train, y_train)
@@ -261,5 +252,13 @@ if uploaded_file is not None:
     
     st.write("\n**AI模型优化建议**")
     st.write(f"AI模型AUC值为 {roc_auc:.2f}，最佳阈值为 {best_threshold:.2f}，可根据此阈值优化AI模型。")
-     
+
+    # 提供模型下载按钮
+    with open(model_file, "rb") as f:
+        st.download_button(
+            label="下载训练好的模型文件",
+            data=f,
+            file_name=model_file,
+            mime="application/octet-stream"
+         )
 
