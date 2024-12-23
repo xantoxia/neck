@@ -200,7 +200,7 @@ if uploaded_file is not None:
     # 机器学习
     def load_model_from_github():
         model_url = "https://github.com/xantoxia/neck/releases/download/v1.0/肩颈分析-机器学习版模型.txt"
-        local_model_path = "model.joblib"
+        local_model_path = "肩颈分析-机器学习版模型.txt"
 
         X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
         if 'Label' not in data.columns:
