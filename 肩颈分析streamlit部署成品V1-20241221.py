@@ -197,25 +197,26 @@ if uploaded_file is not None:
 
         return abnormal_indices
   
-    # 机器学习
-    def load_model_from_github():
-        model_url = "https://github.com/xantoxia/neck/releases/download/v1.0/肩颈分析-机器学习版模型.txt"
-        local_model_path = "model.joblib"
+# 机器学习
+def load_model_from_github():
+    model_url = "https://github.com/xantoxia/neck/releases/download/v1.0/肩颈分析-机器学习版模型.txt"
+    local_model_path = "model.joblib"
 
     X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
     if 'Label' not in data.columns:
-            np.random.seed(42)
-            data['Label'] = np.random.choice([0, 1], size=len(data))
+        np.random.seed(42)
+        data['Label'] = np.random.choice([0, 1], size=len(data))
     y = data['Label']
-      
-        # 下载模型文件
+
+    # 下载模型文件
     if not os.path.exists(local_model_path):
-         response = requests.get(model_url)
-         with open(local_model_path, 'wb') as f:
-                f.write(response.content)
-        # 加载模型
+        response = requests.get(model_url)
+        with open(local_model_path, 'wb') as f:
+            f.write(response.content)
+
+    # 加载模型
     model = load(local_model_path)
-    return model
+    return model  # 确保这一行与函数保持一致的缩进
 
     # 使用模型
     model = load_model_from_github()
@@ -231,9 +232,7 @@ if uploaded_file is not None:
         st.write(f"#### AI模型共检测到 {len(abnormal_indices)} 条异常数据")
     else:
         st.write("AI模型未检测到异常数据。")
-                           
-    
-    
+
     st.write("### 3.4  AI模型质量评估")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     y_pred = model.predict(X_test)
