@@ -211,12 +211,6 @@ if uploaded_file is not None:
         data['Label'] = np.random.choice([0, 1], size=len(data))
     y = data['Label']
 
-    if not os.path.exists(model_file):
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-        model.fit(X_train, y_train)
-        dump(model, model_file)
-        st.write(f"模型已保存：{model_file}")
-
     # 提供下载按钮
     with open(model_file, "rb") as f:
         st.download_button(
@@ -224,7 +218,13 @@ if uploaded_file is not None:
             data=f,
             file_name=model_file,
             mime="application/octet-stream"
-        )
+         )
+        
+    if not os.path.exists(model_file):
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        model.fit(X_train, y_train)
+        dump(model, model_file)
+        st.write(f"模型已保存：{model_file}")
         
     # 调用函数生成图和结论
     analyze_data(data)
