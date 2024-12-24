@@ -206,7 +206,7 @@ if uploaded_file is not None:
 
         # 中间数据折叠
         if len(data) > 15:
-                st.write(f"#### 中间检测结果：")
+            st.write(f"#### 中间检测结果：")
 
             with st.expander("展开查看中间检测结果"):
                 for index, row in data.iloc[10:-5].iterrows():
