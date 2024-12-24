@@ -220,8 +220,8 @@ if uploaded_file is not None:
                     else:
                         st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
                         
-                    # 在折叠尾部添加折叠回去的按钮
-                    st.button("折叠回去", key="collapse_button")
+                # 在折叠尾部添加折叠回去的按钮
+                st.button("折叠回去", key="collapse_button")
         
         # 后5条
         st.write("#### 后5条检测结果：")
