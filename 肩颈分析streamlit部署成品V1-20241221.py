@@ -213,8 +213,13 @@ if uploaded_file is not None:
             # 计算中间数据条数
             middle_count = middle_end - middle_start + 1
 
-            # 动态标题
-            st.write(f"#### 中间 {middle_count} 条检测结果：")
+            # 确保 middle_count 为正值
+            if middle_count > 0:
+                st.write(f"#### 中间 {middle_count} 条检测结果：")
+            else:
+                st.write("#### 中间 0 条检测结果：")
+        else:
+            st.write("#### 数据量不足以显示中间部分。")
 
             with st.expander("展开查看中间数据"):
                 for index, row in data.iloc[10:-5].iterrows():
