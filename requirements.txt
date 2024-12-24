@@ -5,3 +5,4 @@ numpy
 scikit-learn
 streamlit
 joblib
+streamlit-extras
