@@ -319,28 +319,31 @@ if uploaded_file is not None:
          )
 
 # 提供HTML下载
-import streamlit.components.v1 as components
+def generate_page_html():
+    # 生成 HTML 内容，包含表格、结论等
+    html_content = f"""
+    <html>
+        <head>
+            <title>Streamlit 页面导出</title>
+        </head>
+        <body>
+            <h1>肩颈角度动态分析与异常检测</h1>
+            <h2>数据预览</h2>
+            {data_reset.to_html()}  <!-- 数据表格 -->
+            <h2>分析结论</h2>
+            <p>颈部角度范围：{stats['颈部角度(°)']['min']}° 至 {stats['颈部角度(°)']['max']}°，平均值为 {stats['颈部角度(°)']['mean']:.2f}°</p>
+            <p>肩部旋转角度范围：{stats['肩部旋转角度(°)']['min']}° 至 {stats['肩部旋转角度(°)']['max']}°，平均值为 {stats['肩部旋转角度(°)']['mean']:.2f}°</p>
+        </body>
+    </html>
+    """
+    return html_content
 
-# Function to capture current Streamlit page as HTML
-def export_streamlit_page():
-    # 使用 Streamlit 的 components 将当前页面导出为 HTML
-    html = components.html("""
-        <html>
-            <head><title>Streamlit 页面导出</title></head>
-            <body>
-                <script>
-                    let content = document.documentElement.outerHTML; // 获取整个页面 HTML
-                    const blob = new Blob([content], {type: 'text/html'}); // 转换为 Blob
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'streamlit_page.html'; // 设置下载文件名
-                    link.click();
-                </script>
-            </body>
-        </html>
-    """, height=0, width=0)
-    return html
-
-# 添加下载按钮
-st.button("下载页面内容为 HTML 文件", on_click=export_streamlit_page)
-
+# 导出按钮
+if st.button("下载页面内容为 HTML 文件"):
+    html_content = generate_page_html()
+    st.download_button(
+        label="下载 HTML 文件",
+        data=html_content,
+        file_name="streamlit_page.html",
+        mime="text/html"
+    )
