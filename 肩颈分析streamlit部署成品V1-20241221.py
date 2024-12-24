@@ -175,6 +175,8 @@ if uploaded_file is not None:
 
         abnormal_indices = []
         st.write("#### 3.3  作业姿势AI模型检测结果")
+        
+        with st.expander("查看详细检测结果"):
         for index, row in data.iterrows():
             rule_based_conclusion = "正常"
             if row['颈部角度(°)'] > neck_threshold:
