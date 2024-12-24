@@ -384,8 +384,4 @@ def upload_model_to_github(model_file):
     except Exception as e:
         st.error(f"上传模型到 GitHub 失败：{e}")
 
-# 调用上传函数
-if os.path.exists(model_file):
     upload_model_to_github(model_file)
-else:
-    st.error(f"模型文件 {model_file} 不存在，无法上传。")
