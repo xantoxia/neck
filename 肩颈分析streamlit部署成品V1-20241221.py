@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 import os
-import streamlit_extras
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, auc
@@ -318,18 +317,3 @@ if uploaded_file is not None:
             file_name=model_file,
             mime="application/octet-stream"
          )
-
-# 提供HTML下载
-def export_as_html():
-    st.markdown("""
-        <a href="data:text/html;charset=utf-8,{html}" download="streamlit_page.html">
-        <button>导出当前页面为 HTML</button>
-        </a>
-        """.format(html=st.session_state.page_content), unsafe_allow_html=True)
-
-if st.button("保存当前页面"):
-    st.session_state.page_content = st.markdown("""
-        <h1>Streamlit 页面内容</h1>
-        <p>这里是可以导出的 HTML 内容。</p>
-    """, unsafe_allow_html=True)
-    export_as_html()
