@@ -317,3 +317,30 @@ if uploaded_file is not None:
             file_name=model_file,
             mime="application/octet-stream"
          )
+
+# 提供HTML下载
+import streamlit.components.v1 as components
+
+# Function to capture current Streamlit page as HTML
+def export_streamlit_page():
+    # 使用 Streamlit 的 components 将当前页面导出为 HTML
+    html = components.html("""
+        <html>
+            <head><title>Streamlit 页面导出</title></head>
+            <body>
+                <script>
+                    let content = document.documentElement.outerHTML; // 获取整个页面 HTML
+                    const blob = new Blob([content], {type: 'text/html'}); // 转换为 Blob
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'streamlit_page.html'; // 设置下载文件名
+                    link.click();
+                </script>
+            </body>
+        </html>
+    """, height=0, width=0)
+    return html
+
+# 添加下载按钮
+st.button("下载页面内容为 HTML 文件", on_click=export_streamlit_page)
+
