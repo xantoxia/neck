@@ -206,22 +206,9 @@ if uploaded_file is not None:
 
         # 中间数据折叠
         if len(data) > 15:
-            # 中间数据的起止索引
-            middle_start = 10
-            middle_end = len(abnormal_indices) - 5
+                st.write(f"#### 中间检测结果：")
 
-            # 计算中间数据条数
-            middle_count = middle_end - middle_start + 1
-
-            # 确保 middle_count 为正值
-            if middle_count > 0:
-                st.write(f"#### 中间 {middle_count} 条检测结果：")
-            else:
-                st.write("#### 中间 0 条检测结果：")
-        else:
-            st.write("#### 数据量不足以显示中间部分。")
-
-            with st.expander("展开查看中间数据"):
+            with st.expander("展开查看中间检测结果"):
                 for index, row in data.iloc[10:-5].iterrows():
                     rule_based_conclusion = "正常"
                     if row['颈部角度(°)'] > neck_threshold:
