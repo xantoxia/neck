@@ -252,53 +252,31 @@ if uploaded_file is not None:
         return abnormal_indices
   
     # 机器学习
-    MODEL_FILE_PATH = '/tmp/shoulder_neck_model.joblib'
+    model_file = '/tmp/肩颈分析-机器学习版模型.joblib'
 
-    # 加载模型函数
-    def load_or_initialize_model():
-        if os.path.exists(MODEL_FILE_PATH):
-            model = load(MODEL_FILE_PATH)
-            st.write("加载已有模型。")
-        else:
-            model = RandomForestClassifier(random_state=42)
-            st.write("初始化新模型。")
-        return model
+    if os.path.exists(model_file):
+        model = load(model_file)
+        st.write("加载已有模型。")
+    else:
+        model = RandomForestClassifier(random_state=42)
 
-    # 保存模型函数
-    def save_model(model):
-        dump(model, MODEL_FILE_PATH)
-        st.write(f"模型已保存至: {MODEL_FILE_PATH}")
-
-    # 训练模型函数
-    def train_model(model, X, y):
-        model.fit(X, y)
-        return model
-
-        # 检查是否已有模型
-        model = load_or_initialize_model()
-
-        # 数据特征和标签准备
-        X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
-        if 'Label' not in data.columns:
-            np.random.seed(42)
-            data['Label'] = np.random.choice([0, 1], size=len(data))
-        y = data['Label']
-
-        # 模型训练
-        model = train_model(model, X, y)
-        save_model(model)
-        st.write(f"模型已保存：{MODEL_FILE_PATH}")
+    X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
+    if 'Label' not in data.columns:
+        np.random.seed(42)
+        data['Label'] = np.random.choice([0, 1], size=len(data))
+    y = data['Label']
+      
+    if not os.path.exists(model_file):
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        model.fit(X_train, y_train)
+        dump(model, model_file)
+        st.write(f"模型已保存：{model_file}")
         
     # 调用函数生成图和结论
     analyze_data(data)
     generate_3d_scatter(data)
     generate_correlation_heatmap(data)
     generate_scatter_plots(data)
-
-    st.write("调试信息：")
-    st.write(f"数据形状: {data.shape}")
-    st.write(f"模型类型: {type(model)}")
-
     abnormal_indices = comprehensive_analysis(data, model)
     
     if abnormal_indices:
