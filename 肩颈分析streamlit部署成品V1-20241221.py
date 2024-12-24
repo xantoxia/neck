@@ -274,17 +274,6 @@ if uploaded_file is not None:
         model.fit(X, y)
         return model
 
-    # 数据处理和模型分析主逻辑
-    if uploaded_file is not None:
-        data = pd.read_csv(uploaded_file)
-        data.columns = ['天(d)', '时间(s)', '颈部角度(°)', '肩部上举角度(°)', 
-                        '肩部外展/内收角度(°)', '肩部旋转角度(°)']
-    
-        # 数据预览
-        st.write("### 数据预览")
-        data.index += 1
-        st.write(data.head())
-
         # 检查是否已有模型
         model = load_or_initialize_model()
 
