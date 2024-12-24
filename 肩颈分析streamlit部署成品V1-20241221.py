@@ -208,7 +208,7 @@ if uploaded_file is not None:
         if len(data) > 15:
             # 中间数据的起止索引
             middle_start = 10
-            middle_end = len(results) - 5
+            middle_end = len(abnormal_indices) - 5
 
             # 计算中间数据条数
             middle_count = middle_end - middle_start + 1
