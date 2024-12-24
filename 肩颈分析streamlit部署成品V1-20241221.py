@@ -29,35 +29,6 @@ repo_name = "xantoxia/neck"  # 替换为你的 GitHub 仓库
 file_path = "models/肩颈分析-机器学习版模型.joblib"  # 在 GitHub 中存储的路径
 commit_message = "更新模型文件"  # 提交信息
 
-# 上传模型到GitHub
-def upload_model_to_github(model_file):
-    try:
-        # 使用Token连接到GitHub
-        g = Github(token)
-        repo = g.get_repo(repo_name)
-
-        # 读取模型文件
-        with open(model_file, "rb") as f:
-            content = f.read()
-
-        # 检查文件是否已经存在
-        try:
-            file = repo.get_contents(file_path)
-            # 如果存在，则更新文件
-            repo.update_file(file_path, commit_message, content, file.sha)
-            st.success(f"模型已成功更新到 GitHub 仓库：{repo_name}/{file_path}")
-        except:
-            # 如果不存在，则创建文件
-            repo.create_file(file_path, commit_message, content)
-            st.success(f"模型已成功上传到 GitHub 仓库：{repo_name}/{file_path}")
-    except Exception as e:
-        st.error(f"上传模型到 GitHub 失败：{e}")
-
-# 调用上传函数
-if os.path.exists(model_file):
-    upload_model_to_github(model_file)
-else:
-    st.error(f"模型文件 {model_file} 不存在，无法上传。")
 
 # 设置中文字体
 simhei_font = font_manager.FontProperties(fname="simhei.ttf")
@@ -388,3 +359,33 @@ if uploaded_file is not None:
             file_name=model_file,
             mime="application/octet-stream"
          )
+        
+# 上传模型到GitHub
+def upload_model_to_github(model_file):
+    try:
+        # 使用Token连接到GitHub
+        g = Github(token)
+        repo = g.get_repo(repo_name)
+
+        # 读取模型文件
+        with open(model_file, "rb") as f:
+            content = f.read()
+
+        # 检查文件是否已经存在
+        try:
+            file = repo.get_contents(file_path)
+            # 如果存在，则更新文件
+            repo.update_file(file_path, commit_message, content, file.sha)
+            st.success(f"模型已成功更新到 GitHub 仓库：{repo_name}/{file_path}")
+        except:
+            # 如果不存在，则创建文件
+            repo.create_file(file_path, commit_message, content)
+            st.success(f"模型已成功上传到 GitHub 仓库：{repo_name}/{file_path}")
+    except Exception as e:
+        st.error(f"上传模型到 GitHub 失败：{e}")
+
+# 调用上传函数
+if os.path.exists(model_file):
+    upload_model_to_github(model_file)
+else:
+    st.error(f"模型文件 {model_file} 不存在，无法上传。")
