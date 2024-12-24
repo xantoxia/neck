@@ -43,8 +43,15 @@ if uploaded_file is not None:
     data.columns = ['天(d)', '时间(s)', '颈部角度(°)', '肩部上举角度(°)', 
                     '肩部外展/内收角度(°)', '肩部旋转角度(°)']
     st.write("### 1.1  数据预览")
-    st.write(data.head())
-    
+
+    # 调整序号显示，从 1 开始
+    data_reset = data.reset_index()  # 重置索引
+    data_reset.index += 1  # 将索引从 1 开始
+    data_reset.rename(columns={"index": "序号"}, inplace=True)  # 添加 "序号" 列
+
+    # 在 Streamlit 显示数据预览
+    st.write(data_reset.head())
+       
     # 数据统计分析函数
     def analyze_data(data):
         st.write("### 1.2  数据统计分析")
