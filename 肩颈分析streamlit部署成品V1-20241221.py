@@ -21,6 +21,8 @@ from github import Github
 
 # 动态读取Token
 token = os.getenv("GITHUB_TOKEN")
+g = Github(token)
+repo = g.get_repo("xantoxia/neck")
 if not token:
     st.error("GitHub Token 未设置。请在 Streamlit Cloud 的 Secrets 中添加 GITHUB_TOKEN。")
     st.stop()
@@ -270,32 +272,34 @@ if uploaded_file is not None:
     file_path = "models/肩颈分析-机器学习版模型.joblib"  # 在 GitHub 中存储的路径
     commit_message = "更新模型文件"  # 提交信息
 
-    if os.path.exists(model_file):
-        model = load(model_file)
-        # 如果模型文件已经存在，则加载
-        st.write("加载已有模型。")
-    else:
-        # 如果模型文件不存在，则重新训练模型并保存
-        model = RandomForestClassifier(random_state=42)
-        st.write("训练新模型。")
+# 获取模型文件列表
+contents = repo.get_contents("models")
+model_files = [file.name for file in contents if file.name.startswith("model_backup_")]
+if model_files:
+    # 按时间戳排序，找到最新的文件
+    model_files.sort(reverse=True)
+    latest_backup_file = model_files[0]
+    st.write(f"最新模型文件为: {latest_backup_file}")
+    
+    # 下载最新模型文件
+    file_content = repo.get_contents(f"models/{latest_backup_file}").decoded_content
+    latest_model_file = "/tmp/latest_model.joblib"
+    with open(latest_model_file, "wb") as f:
+        f.write(file_content)
+    
+    # 加载最新模型
+    model = load(latest_model_file)
+    st.write("加载最新模型完成。")
+else:
+    st.write("未找到任何备份模型，初始化新模型...")
+    model = RandomForestClassifier(random_state=42)
 
     X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
     if 'Label' not in data.columns:
         np.random.seed(42)
         data['Label'] = np.random.choice([0, 1], size=len(data))
     y = data['Label']
-      
-    if not os.path.exists(model_file):
-        # 重新训练模型
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-        model.fit(X_train, y_train)
-        dump(model, model_file)
-        st.write(f"模型已保存到本地！")
-
-        # 上传到 GitHub
-        save_model_to_github(model_file, repo_name, file_path, commit_message)
-        st.write("模型已保存并上传到 GitHub。")
-        
+         
     # 调用函数生成图和结论
     analyze_data(data)
     generate_3d_scatter(data)
