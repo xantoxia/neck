@@ -294,8 +294,8 @@ if uploaded_file is not None:
     fig, ax = plt.subplots(figsize=(8, 6))
 
     # 绘制ROC曲线
-    ax.plot(fpr, tpr, label=f'AUC = {roc_auc:.2f}')
-    ax.plot([0, 1], [0, 1], 'r--')
+    ax.plot(fpr, tpr, label=f'AUC = {roc_auc:.2f}', linestyle='-')
+    ax.plot([0, 1], [0, 1], 'r--', label="随机模型")
 
     # 找到最佳阈值的坐标
     best_threshold_index = (tpr - fpr).argmax()
@@ -307,21 +307,22 @@ if uploaded_file is not None:
     ax.scatter(best_fpr, best_tpr, color='red', label=f'最佳阈值: {best_threshold:.2f}')
     ax.annotate(f'({best_fpr:.2f}, {best_tpr:.2f})',
                 xy=(best_fpr, best_tpr),
-                xytext=(best_fpr + 0.1, best_tpr - 0.1),
+                xytext=(best_fpr - 0.2, best_tpr - 0.1),
                 arrowprops=dict(facecolor='red', arrowstyle='->'),
-                fontsize=10)
+                fontsize=10,
+                fontproperties=simhei_font)
 
     # 设置标题和轴标签
     ax.set_xlabel('假阳性率', fontproperties=simhei_font)
     ax.set_ylabel('真阳性率', fontproperties=simhei_font)
     ax.set_title('ROC曲线', fontproperties=simhei_font)
 
-    # 添加图例
-    ax.legend(loc='lower right')
+    # 添加图例，显式设置字体
+    ax.legend(loc='lower right', prop=simhei_font)
 
     # 在Streamlit中显示图像
     st.pyplot(fig)
-    
+     
     st.write("\n**AI模型优化建议**")
     st.write(f"AI模型AUC值为 {roc_auc:.2f}，最佳阈值为 {best_threshold:.2f}，可根据此阈值优化AI模型。")
 
