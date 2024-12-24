@@ -287,7 +287,7 @@ if uploaded_file is not None:
         # 模型训练
         model = train_model(model, X, y)
         save_model(model)
-            st.write(f"模型已保存：{MODEL_FILE_PATH}")
+        st.write(f"模型已保存：{MODEL_FILE_PATH}")
         
     # 调用函数生成图和结论
     analyze_data(data)
