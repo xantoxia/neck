@@ -283,9 +283,7 @@ if uploaded_file is not None:
         st.write(f"#### AI模型共检测到 {len(abnormal_indices)} 条异常数据")
     else:
         st.write("AI模型未检测到异常数据。")
-                           
-    
-    
+                               
     st.write("### 3.4  AI模型质量评估")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     y_pred = model.predict(X_test)
@@ -294,13 +292,17 @@ if uploaded_file is not None:
     roc_auc = auc(fpr, tpr)
 
     fig, ax = plt.subplots(figsize=(8, 6))
+
+    # 绘制ROC曲线
     ax.plot(fpr, tpr, label=f'AUC = {roc_auc:.2f}')
     ax.plot([0, 1], [0, 1], 'r--')
-    ax.set_xlabel('假阳性率', fontproperties=simhei_font)
-    ax.set_ylabel('真阳性率', fontproperties=simhei_font)
-    ax.set_title('ROC曲线', fontproperties=simhei_font)
-    ax.legend(loc='lower right')
-    
+
+    # 找到最佳阈值的坐标
+    best_threshold_index = (tpr - fpr).argmax()
+    best_threshold = thresholds[best_threshold_index]
+    best_fpr = fpr[best_threshold_index]
+    best_tpr = tpr[best_threshold_index]
+
     # 在ROC曲线上标注最佳阈值点
     ax.scatter(best_fpr, best_tpr, color='red', label=f'最佳阈值: {best_threshold:.2f}')
     ax.annotate(f'({best_fpr:.2f}, {best_tpr:.2f})',
@@ -308,13 +310,17 @@ if uploaded_file is not None:
                 xytext=(best_fpr + 0.1, best_tpr - 0.1),
                 arrowprops=dict(facecolor='red', arrowstyle='->'),
                 fontsize=10)
-    
+
+    # 设置标题和轴标签
+    ax.set_xlabel('假阳性率', fontproperties=simhei_font)
+    ax.set_ylabel('真阳性率', fontproperties=simhei_font)
+    ax.set_title('ROC曲线', fontproperties=simhei_font)
+
+    # 添加图例
+    ax.legend(loc='lower right')
+
+    # 在Streamlit中显示图像
     st.pyplot(fig)
-    
-    best_threshold_index = (tpr - fpr).argmax()
-    best_threshold = thresholds[best_threshold_index]
-    best_fpr = fpr[best_threshold_index]
-    best_tpr = tpr[best_threshold_index]
     
     st.write("\n**AI模型优化建议**")
     st.write(f"AI模型AUC值为 {roc_auc:.2f}，最佳阈值为 {best_threshold:.2f}，可根据此阈值优化AI模型。")
