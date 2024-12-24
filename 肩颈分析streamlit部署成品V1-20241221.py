@@ -294,7 +294,7 @@ if uploaded_file is not None:
     generate_3d_scatter(data)
     generate_correlation_heatmap(data)
     generate_scatter_plots(data)
-    abnormal_indices = comprehensive_analysis(data, MODEL_FILE_PATH)
+    abnormal_indices = comprehensive_analysis(data, model)
     
     if abnormal_indices:
         st.write(f"#### AI模型共检测到 {len(abnormal_indices)} 条异常数据")
