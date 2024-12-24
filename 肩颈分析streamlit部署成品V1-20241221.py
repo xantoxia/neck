@@ -287,6 +287,7 @@ if uploaded_file is not None:
     else:
         # 如果模型文件不存在，则重新训练模型并保存
         model = RandomForestClassifier(random_state=42)
+        st.write("训练新模型。")
 
     X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
     if 'Label' not in data.columns:
