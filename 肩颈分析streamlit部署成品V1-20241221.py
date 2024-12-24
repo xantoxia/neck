@@ -383,3 +383,6 @@ def upload_model_to_github(model_file):
             st.success(f"模型已成功上传到 GitHub 仓库：{repo_name}/{file_path}")
     except Exception as e:
         st.error(f"上传模型到 GitHub 失败：{e}")
+        
+# 执行上传模型到GitHub
+upload_model_to_github(model_file)
