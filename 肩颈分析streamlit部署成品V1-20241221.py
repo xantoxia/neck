@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 import os
+import streamlit_extras
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, auc
