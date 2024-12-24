@@ -350,16 +350,6 @@ if uploaded_file is not None:
     st.write("\n**AI模型优化建议**")
     st.write(f"AI模型AUC值为 {roc_auc:.2f}，最佳阈值为 {best_threshold:.2f}，可根据此阈值优化AI模型。")
 
-    # 提供模型下载按钮
-    st.write(f"模型文件存储路径: {os.getcwd()}")
-    with open(model_file, "rb") as f:
-        st.download_button(
-            label="下载训练好的模型文件",
-            data=f,
-            file_name=model_file,
-            mime="application/octet-stream"
-         )
-        
 # 上传模型到GitHub
 def upload_model_to_github(model_file):
     try:
