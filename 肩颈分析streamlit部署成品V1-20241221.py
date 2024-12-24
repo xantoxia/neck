@@ -10,12 +10,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
+import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, auc
 from joblib import dump, load
 from matplotlib import font_manager
-import os
+from streamlit_extras.save_page_button import save_page_button
 
 # 设置中文字体
 simhei_font = font_manager.FontProperties(fname="simhei.ttf")
@@ -319,31 +320,4 @@ if uploaded_file is not None:
          )
 
 # 提供HTML下载
-def generate_page_html():
-    # 生成 HTML 内容，包含表格、结论等
-    html_content = f"""
-    <html>
-        <head>
-            <title>Streamlit 页面导出</title>
-        </head>
-        <body>
-            <h1>肩颈角度动态分析与异常检测</h1>
-            <h2>数据预览</h2>
-            {data_reset.to_html()}  <!-- 数据表格 -->
-            <h2>分析结论</h2>
-            <p>颈部角度范围：{stats['颈部角度(°)']['min']}° 至 {stats['颈部角度(°)']['max']}°，平均值为 {stats['颈部角度(°)']['mean']:.2f}°</p>
-            <p>肩部旋转角度范围：{stats['肩部旋转角度(°)']['min']}° 至 {stats['肩部旋转角度(°)']['max']}°，平均值为 {stats['肩部旋转角度(°)']['mean']:.2f}°</p>
-        </body>
-    </html>
-    """
-    return html_content
-
-# 导出按钮
-if st.button("下载页面内容为 HTML 文件"):
-    html_content = generate_page_html()
-    st.download_button(
-        label="下载 HTML 文件",
-        data=html_content,
-        file_name="streamlit_page.html",
-        mime="text/html"
-    )
+save_page_button("保存当前页面为 HTML 文件")
