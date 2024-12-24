@@ -206,7 +206,16 @@ if uploaded_file is not None:
 
         # 中间数据折叠
         if len(data) > 15:
-            st.write("#### 中间数据：")
+            # 中间数据的起止索引
+            middle_start = 10
+            middle_end = len(results) - 5
+
+            # 计算中间数据条数
+            middle_count = middle_end - middle_start + 1
+
+            # 动态标题
+            st.write(f"#### 中间 {middle_count} 条检测结果：")
+
             with st.expander("展开查看中间数据"):
                 for index, row in data.iloc[10:-5].iterrows():
                     rule_based_conclusion = "正常"
