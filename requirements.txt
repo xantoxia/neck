@@ -6,4 +6,4 @@ scikit-learn
 streamlit
 joblib
 streamlit-extras>=0.5.0
-github
+PyGithub
