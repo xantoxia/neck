@@ -17,7 +17,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, auc
 from joblib import dump, load
 from matplotlib import font_manager
-from streamlit_extras.save_page_button import save_page_button
 
 # 设置中文字体
 simhei_font = font_manager.FontProperties(fname="simhei.ttf")
@@ -321,4 +320,16 @@ if uploaded_file is not None:
          )
 
 # 提供HTML下载
-save_page_button("保存当前页面为 HTML 文件")
+def export_as_html():
+    st.markdown("""
+        <a href="data:text/html;charset=utf-8,{html}" download="streamlit_page.html">
+        <button>导出当前页面为 HTML</button>
+        </a>
+        """.format(html=st.session_state.page_content), unsafe_allow_html=True)
+
+if st.button("保存当前页面"):
+    st.session_state.page_content = st.markdown("""
+        <h1>Streamlit 页面内容</h1>
+        <p>这里是可以导出的 HTML 内容。</p>
+    """, unsafe_allow_html=True)
+    export_as_html()
