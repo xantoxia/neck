@@ -366,11 +366,11 @@ if uploaded_file is not None:
                 file = repo.get_contents(file_path)
                 # 如果存在，则更新文件
                 repo.update_file(file_path, commit_message, content, file.sha)
-                st.success(f"模型已成功更新到 GitHub 仓库：{repo_name}/{file_path}")
+                st.success(f"模型已成功更新到 GitHub 仓库：neck/models/{file_path}")
             except:
                 # 如果不存在，则创建文件
                 repo.create_file(file_path, commit_message, content)
-                st.success(f"模型已成功上传到 GitHub 仓库：{repo_name}/{file_path}")
+                st.success(f"模型已成功上传到 GitHub 仓库：neck/models/{file_path}")
         except Exception as e:
             st.error(f"上传模型到 GitHub 失败：{e}")
         
