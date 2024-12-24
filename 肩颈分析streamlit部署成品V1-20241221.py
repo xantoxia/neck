@@ -300,10 +300,21 @@ if uploaded_file is not None:
     ax.set_ylabel('真阳性率', fontproperties=simhei_font)
     ax.set_title('ROC曲线', fontproperties=simhei_font)
     ax.legend(loc='lower right')
+    
+    # 在ROC曲线上标注最佳阈值点
+    ax.scatter(best_fpr, best_tpr, color='red', label=f'最佳阈值: {best_threshold:.2f}')
+    ax.annotate(f'({best_fpr:.2f}, {best_tpr:.2f})',
+                xy=(best_fpr, best_tpr),
+                xytext=(best_fpr + 0.1, best_tpr - 0.1),
+                arrowprops=dict(facecolor='red', arrowstyle='->'),
+                fontsize=10)
+    
     st.pyplot(fig)
     
     best_threshold_index = (tpr - fpr).argmax()
     best_threshold = thresholds[best_threshold_index]
+    best_fpr = fpr[best_threshold_index]
+    best_tpr = tpr[best_threshold_index]
     
     st.write("\n**AI模型优化建议**")
     st.write(f"AI模型AUC值为 {roc_auc:.2f}，最佳阈值为 {best_threshold:.2f}，可根据此阈值优化AI模型。")
