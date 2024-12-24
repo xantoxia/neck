@@ -294,6 +294,11 @@ if uploaded_file is not None:
     generate_3d_scatter(data)
     generate_correlation_heatmap(data)
     generate_scatter_plots(data)
+
+    st.write("调试信息：")
+    st.write(f"数据形状: {data.shape}")
+    st.write(f"模型类型: {type(model)}")
+
     abnormal_indices = comprehensive_analysis(data, model)
     
     if abnormal_indices:
