@@ -10,6 +10,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
+import time
 import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -29,6 +30,8 @@ repo_name = "xantoxia/neck"  # 替换为你的 GitHub 仓库
 file_path = "models/肩颈分析-机器学习版模型.joblib"  # 在 GitHub 中存储的路径
 commit_message = "更新模型文件"  # 提交信息
 
+# 定义带时间戳的备份文件名
+timestamp = time.strftime("%Y%m%d_%H%M%S")
 
 # 设置中文字体
 simhei_font = font_manager.FontProperties(fname="simhei.ttf")
@@ -366,11 +369,11 @@ if uploaded_file is not None:
                 file = repo.get_contents(file_path)
                 # 如果存在，则更新文件
                 repo.update_file(file_path, commit_message, content, file.sha)
-                st.success(f"模型已成功更新到 GitHub 仓库：neck/models/{file_path}")
+                st.success(f"模型已成功更新到 GitHub 仓库：neck/{file_path}")
             except:
                 # 如果不存在，则创建文件
                 repo.create_file(file_path, commit_message, content)
-                st.success(f"模型已成功上传到 GitHub 仓库：neck/models/{file_path}")
+                st.success(f"模型已成功上传到 GitHub 仓库：neck/{file_path}_{timestamp}")
         except Exception as e:
             st.error(f"上传模型到 GitHub 失败：{e}")
         
