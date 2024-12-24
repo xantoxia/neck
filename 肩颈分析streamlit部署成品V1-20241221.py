@@ -276,7 +276,7 @@ if uploaded_file is not None:
   
     # 机器学习
     model_file = '/tmp/肩颈分析-机器学习版模型.joblib'
-    repo_name = "xanto/neck"  # 替换为你的 GitHub 仓库
+    repo_name = "https://github.com/xantoxia/neck"  # 替换为你的 GitHub 仓库
     file_path = "models/肩颈分析-机器学习版模型.joblib"  # 在 GitHub 中存储的路径
     commit_message = "更新模型文件"  # 提交信息
 
