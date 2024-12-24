@@ -252,7 +252,7 @@ if uploaded_file is not None:
         return abnormal_indices
   
     # 机器学习
-    MODEL_FILE_PATH = '/tmp/肩颈分析-机器学习版模型.joblib'
+    MODEL_FILE_PATH = "/tmp/肩颈分析-机器学习版模型.joblib"
 
     # 加载模型函数
     def load_or_initialize_model():
