@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 import os
-import time
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, auc
@@ -384,8 +383,8 @@ def upload_model_to_github(model_file):
     except Exception as e:
         st.error(f"上传模型到 GitHub 失败：{e}")
 
-        # 调用上传函数
-        if os.path.exists(model_file):
-            upload_model_to_github(model_file)
-        else:
-            st.error(f"模型文件 {model_file} 不存在，无法上传。")
+    # 调用上传函数
+    if os.path.exists(model_file):
+        upload_model_to_github(model_file)
+    else:
+         st.error(f"模型文件 {model_file} 不存在，无法上传。")
