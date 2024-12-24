@@ -189,13 +189,13 @@ if uploaded_file is not None:
                                                       row['肩部外展/内收角度(°)'], row['肩部旋转角度(°)']]])[0] == 1 else "正常"
 
             if rule_based_conclusion == "正常" and ml_conclusion == "异常":
-                st.write(f"- 第 {index} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
+                st.write(f"- 第 {index+1} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
                 abnormal_indices.append(index)
             elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
-                st.write(f"- 第 {index} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
+                st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
                 abnormal_indices.append(index)
             else:
-                st.write(f"- 第 {index} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
+                st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
 
         # 中间数据折叠
         if len(data) > 15:
@@ -212,13 +212,13 @@ if uploaded_file is not None:
                                                               row['肩部外展/内收角度(°)'], row['肩部旋转角度(°)']]])[0] == 1 else "正常"
 
                     if rule_based_conclusion == "正常" and ml_conclusion == "异常":
-                        st.write(f"- 第 {index} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
+                        st.write(f"- 第 {index+1} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
                         abnormal_indices.append(index)
                     elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
-                        st.write(f"- 第 {index} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
+                        st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
                         abnormal_indices.append(index)
                     else:
-                        st.write(f"- 第 {index} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
+                        st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
 
         # 后5条
         st.write("#### 后5条检测结果：")
@@ -233,13 +233,13 @@ if uploaded_file is not None:
                                                       row['肩部外展/内收角度(°)'], row['肩部旋转角度(°)']]])[0] == 1 else "正常"
 
             if rule_based_conclusion == "正常" and ml_conclusion == "异常":
-                st.write(f"- 第 {index} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
+                st.write(f"- 第 {index+1} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
                 abnormal_indices.append(index)
             elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
-                st.write(f"- 第 {index} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
+                st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
                 abnormal_indices.append(index)
             else:
-                st.write(f"- 第 {index} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
+                st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
 
         return abnormal_indices
   
