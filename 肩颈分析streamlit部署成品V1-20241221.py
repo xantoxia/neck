@@ -350,29 +350,29 @@ if uploaded_file is not None:
     st.write("\n**AI模型优化建议**")
     st.write(f"AI模型AUC值为 {roc_auc:.2f}，最佳阈值为 {best_threshold:.2f}，可根据此阈值优化AI模型。")
 
-# 上传模型到GitHub
-def upload_model_to_github(model_file):
-    try:
-        # 使用Token连接到GitHub
-        g = Github(token)
-        repo = g.get_repo(repo_name)
-
-        # 读取模型文件
-        with open(model_file, "rb") as f:
-            content = f.read()
-
-        # 检查文件是否已经存在
+    # 上传模型到GitHub
+    def upload_model_to_github(model_file):
         try:
-            file = repo.get_contents(file_path)
-            # 如果存在，则更新文件
-            repo.update_file(file_path, commit_message, content, file.sha)
-            st.success(f"模型已成功更新到 GitHub 仓库：{repo_name}/{file_path}")
-        except:
-            # 如果不存在，则创建文件
-            repo.create_file(file_path, commit_message, content)
-            st.success(f"模型已成功上传到 GitHub 仓库：{repo_name}/{file_path}")
-    except Exception as e:
-        st.error(f"上传模型到 GitHub 失败：{e}")
+            # 使用Token连接到GitHub
+            g = Github(token)
+            repo = g.get_repo(repo_name)
+
+            # 读取模型文件
+            with open(model_file, "rb") as f:
+                content = f.read()
+
+            # 检查文件是否已经存在
+            try:
+                file = repo.get_contents(file_path)
+                # 如果存在，则更新文件
+                repo.update_file(file_path, commit_message, content, file.sha)
+                st.success(f"模型已成功更新到 GitHub 仓库：{repo_name}/{file_path}")
+            except:
+                # 如果不存在，则创建文件
+                repo.create_file(file_path, commit_message, content)
+                st.success(f"模型已成功上传到 GitHub 仓库：{repo_name}/{file_path}")
+        except Exception as e:
+            st.error(f"上传模型到 GitHub 失败：{e}")
         
-# 执行上传模型到GitHub
-upload_model_to_github(model_file)
+    # 执行上传模型到GitHub
+    upload_model_to_github(model_file)
