@@ -16,6 +16,29 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, auc
 from joblib import dump, load
 from matplotlib import font_manager
+from github import Github
+
+from github import Github
+
+# GitHub 上传函数
+def save_model_to_github(model_file, repo_name, file_path, commit_message):
+    token = st.secrets["github_token"]  # 从 Streamlit Secrets 获取 GitHub Token
+    g = Github(token)
+    repo = g.get_repo(repo_name)  # 获取目标仓库
+
+    with open(model_file, "rb") as f:
+        content = f.read()  # 读取模型文件内容
+
+    try:
+        # 如果文件已经存在，更新文件
+        file = repo.get_contents(file_path)
+        repo.update_file(file_path, commit_message, content, file.sha)
+        st.write("模型已成功更新到 GitHub！")
+    except:
+        # 如果文件不存在，创建新文件
+        repo.create_file(file_path, commit_message, content)
+        st.write("模型已成功上传到 GitHub！")
+
 
 # 设置中文字体
 simhei_font = font_manager.FontProperties(fname="simhei.ttf")
@@ -253,11 +276,16 @@ if uploaded_file is not None:
   
     # 机器学习
     model_file = '/tmp/肩颈分析-机器学习版模型.joblib'
+    repo_name = "xanto/neck"  # 替换为你的 GitHub 仓库
+    file_path = "models/肩颈分析-机器学习版模型.joblib"  # 在 GitHub 中存储的路径
+    commit_message = "更新模型文件"  # 提交信息
 
     if os.path.exists(model_file):
         model = load(model_file)
+        # 如果模型文件已经存在，则加载
         st.write("加载已有模型。")
     else:
+        # 如果模型文件不存在，则重新训练模型并保存
         model = RandomForestClassifier(random_state=42)
 
     X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
@@ -267,10 +295,15 @@ if uploaded_file is not None:
     y = data['Label']
       
     if not os.path.exists(model_file):
+        # 重新训练模型
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
         model.fit(X_train, y_train)
         dump(model, model_file)
-        st.write(f"模型已保存：{model_file}")
+        st.write(f"模型已保存到本地！")
+
+        # 上传到 GitHub
+        save_model_to_github(model_file, repo_name, file_path, commit_message)
+        st.write("模型已保存并上传到 GitHub。")
         
     # 调用函数生成图和结论
     analyze_data(data)
