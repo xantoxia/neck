@@ -30,7 +30,6 @@ repo_name = "xantoxia/neck"  # 替换为你的 GitHub 仓库
 file_path = "models/肩颈分析-机器学习版模型.joblib"  # 在 GitHub 中存储的路径
 commit_message = "更新模型文件"  # 提交信息
 
-
 # 设置中文字体
 simhei_font = font_manager.FontProperties(fname="simhei.ttf")
 plt.rcParams['font.family'] = simhei_font.get_name()  # 使用 SimHei 字体
