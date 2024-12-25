@@ -297,8 +297,8 @@ if uploaded_file is not None:
   
     # 机器学习
     if uploaded_file is not None:
-    # 下载最新模型
-    model_path = download_latest_model_from_github()
+        # 下载最新模型
+        model_path = download_latest_model_from_github()
 
     if model_path:
         model = load(model_path)
