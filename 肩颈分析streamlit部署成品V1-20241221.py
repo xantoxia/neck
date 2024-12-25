@@ -27,11 +27,39 @@ if not token:
 
 # GitHub 配置
 repo_name = "xantoxia/neck"  # 替换为你的 GitHub 仓库
-file_path = "models/肩颈分析-机器学习版模型.joblib"  # 在 GitHub 中存储的路径
+models_folder = "models/"  # GitHub 仓库中模型文件存储路径
+latest_model_file = "latest_model_info.txt"  # 最新模型信息文件
 commit_message = "更新模型文件"  # 提交信息
 
 # 定义带时间戳的备份文件名
 timestamp = time.strftime("%Y%m%d_%H%M%S")
+model_filename = f"肩颈分析-模型-{timestamp}.joblib"
+
+# 下载最新模型文件
+def download_latest_model_from_github():
+    try:
+        g = Github(token)
+        repo = g.get_repo(repo_name)
+
+        # 获取最新模型信息
+        try:
+            latest_info = repo.get_contents(models_folder + latest_model_file).decoded_content.decode()
+            latest_model_path = models_folder + latest_info.strip()
+            st.write(f"最新模型路径：{latest_model_path}")
+
+            # 下载最新模型文件
+            file_content = repo.get_contents(latest_model_path)
+            with open("/tmp/latest_model.joblib", "wb") as f:
+                f.write(file_content.decoded_content)
+
+            st.success("成功下载最新模型！")
+            return "/tmp/latest_model.joblib"
+        except:
+            st.warning("未找到最新模型信息文件，无法下载模型。")
+            return None
+    except Exception as e:
+        st.error(f"从 GitHub 下载模型失败：{e}")
+        return None
 
 # 设置中文字体
 simhei_font = font_manager.FontProperties(fname="simhei.ttf")
@@ -268,36 +296,44 @@ if uploaded_file is not None:
         return abnormal_indices
   
     # 机器学习
-    model_file = '/tmp/肩颈分析-机器学习版模型.joblib'
-    repo_name = "xantoxia/neck"  # 替换为你的 GitHub 仓库
-    file_path = "models/肩颈分析-机器学习版模型.joblib"  # 在 GitHub 中存储的路径
-    commit_message = "更新模型文件"  # 提交信息
+    if uploaded_file is not None:
+    # 下载最新模型
+    model_path = download_latest_model_from_github()
 
-    if os.path.exists(model_file):
-        model = load(model_file)
-        # 如果模型文件已经存在，则加载
-        st.write("加载已有模型。")
+    if model_path:
+        model = load(model_path)
+        st.write("加载最新模型进行分析。")
     else:
-        # 如果模型文件不存在，则重新训练模型并保存
         model = RandomForestClassifier(random_state=42)
-        st.write("训练新模型。")
+        st.write("未加载到模型，训练新模型。")
 
+    # 模型训练或重新训练
     X = data[['颈部角度(°)', '肩部上举角度(°)', '肩部外展/内收角度(°)', '肩部旋转角度(°)']]
     if 'Label' not in data.columns:
         np.random.seed(42)
         data['Label'] = np.random.choice([0, 1], size=len(data))
     y = data['Label']
-      
-    if not os.path.exists(model_file):
-        # 重新训练模型
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-        model.fit(X_train, y_train)
-        dump(model, model_file)
-        st.write(f"模型已保存到本地！")
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    model.fit(X_train, y_train)
+    
+    # 保存新模型到临时文件夹
+    local_model_path = f"/tmp/{model_filename}"
+    dump(model, local_model_path)
+    st.write("模型已训练并保存到本地临时路径。")
 
-        # 上传到 GitHub
-        save_model_to_github(model_file, repo_name, file_path, commit_message)
-        st.write("模型已保存并上传到 GitHub。")
+    # 上传新模型到 GitHub
+    upload_file_to_github(local_model_path, models_folder + model_filename, commit_message)
+    st.write("模型已保存并上传到 GitHub。")
+    
+    # 更新最新模型信息
+    latest_info_path = "/tmp/" + latest_model_file
+    with open(latest_info_path, "w") as f:
+        f.write(model_filename)
+    upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
+
+    st.success("新模型已上传，并更新最新模型记录。")
+    
         
     # 调用函数生成图和结论
     analyze_data(data)
@@ -352,30 +388,3 @@ if uploaded_file is not None:
      
     st.write("\n**AI模型优化建议**")
     st.write(f"AI模型AUC值为 {roc_auc:.2f}，最佳阈值为 {best_threshold:.2f}，可根据此阈值优化AI模型。")
-
-    # 上传模型到GitHub
-    def upload_model_to_github(model_file):
-        try:
-            # 使用Token连接到GitHub
-            g = Github(token)
-            repo = g.get_repo(repo_name)
-
-            # 读取模型文件
-            with open(model_file, "rb") as f:
-                content = f.read()
-
-            # 检查文件是否已经存在
-            try:
-                file = repo.get_contents(file_path)
-                # 如果存在，则更新文件
-                repo.update_file(file_path, commit_message, content, file.sha)
-                st.success(f"模型已成功更新到 GitHub 仓库：neck/{file_path}")
-            except:
-                # 如果不存在，则创建文件
-                repo.create_file(file_path, commit_message, content)
-                st.success(f"模型已成功上传到 GitHub 仓库：neck/{file_path}")
-        except Exception as e:
-            st.error(f"上传模型到 GitHub 失败：{e}")
-        
-    # 执行上传模型到GitHub
-    upload_model_to_github(model_file)
