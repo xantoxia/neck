@@ -72,7 +72,6 @@ def download_latest_model_from_github():
             file_content = repo.get_contents(latest_model_path)
             with open("/tmp/latest_model.joblib", "wb") as f:
                 f.write(file_content.decoded_content)
-
             st.success("成功下载最新模型！")
             return "/tmp/latest_model.joblib"
         except:
@@ -88,7 +87,7 @@ plt.rcParams['font.family'] = simhei_font.get_name()  # 使用 SimHei 字体
 plt.rcParams['axes.unicode_minus'] = False  # 修复负号显示问题
 
 # Streamlit 标题
-st.title("肩颈角度动态分析与异常检测")
+st.title("肩颈角度自动分析与异常检测")
 st.write("本人因AI工具结合人因规则与机器学习模型，自动检测异常作业姿势并提供可视化分析。")
 
 # 模板下载
@@ -336,25 +335,8 @@ if uploaded_file is not None:
     y = data['Label']
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-    model.fit(X_train, y_train)
-    
-    # 保存新模型到临时文件夹
-    local_model_path = f"/tmp/{model_filename}"
-    dump(model, local_model_path)
-    st.write("模型已训练并保存到本地临时路径。")
-
-    # 上传新模型到 GitHub
-    upload_file_to_github(local_model_path, models_folder + model_filename, commit_message)
-    st.write("模型已保存并上传到 GitHub。")
-    
-    # 更新最新模型信息
-    latest_info_path = "/tmp/" + latest_model_file
-    with open(latest_info_path, "w") as f:
-        f.write(model_filename)
-    upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
-
-    st.success("新模型已上传，并更新最新模型记录。")
-            
+    model.fit(X_train, y_train)   
+           
     # 调用函数生成图和结论
     analyze_data(data)
     generate_3d_scatter(data)
@@ -407,4 +389,20 @@ if uploaded_file is not None:
     st.pyplot(fig)
      
     st.write("\n**AI模型优化建议**")
+
+        # 保存新模型到临时文件夹
+    local_model_path = f"/tmp/{model_filename}"
+    dump(model, local_model_path)
+    st.write("模型已训练并保存到本地临时路径。")
+
+    # 上传新模型到 GitHub
+    upload_file_to_github(local_model_path, models_folder + model_filename, commit_message)
+    st.write("模型已保存并上传到 GitHub。")
+    
+    # 更新最新模型信息
+    latest_info_path = "/tmp/" + latest_model_file
+    with open(latest_info_path, "w") as f:
+        f.write(model_filename)
+    upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
+    st.success("新模型已上传，并更新最新模型记录。")
     st.write(f"AI模型AUC值为 {roc_auc:.2f}，最佳阈值为 {best_threshold:.2f}，可根据此阈值优化AI模型。")
