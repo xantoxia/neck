@@ -35,6 +35,27 @@ commit_message = "更新模型文件"  # 提交信息
 timestamp = time.strftime("%Y%m%d_%H%M%S")
 model_filename = f"肩颈分析-模型-{timestamp}.joblib"
 
+# 上传文件到 GitHub
+def upload_file_to_github(file_path, github_path, commit_message):
+    try:
+        g = Github(token)
+        repo = g.get_repo(repo_name)
+
+        # 读取文件内容
+        with open(file_path, "rb") as f:
+            content = f.read()
+
+        # 检查文件是否存在
+        try:
+            file = repo.get_contents(github_path)
+            repo.update_file(github_path, commit_message, content, file.sha)
+            st.success(f"文件已成功更新到 GitHub 仓库：{github_path}")
+        except:
+            repo.create_file(github_path, commit_message, content)
+            st.success(f"文件已成功上传到 GitHub 仓库：{github_path}")
+    except Exception as e:
+        st.error(f"上传文件到 GitHub 失败：{e}")
+
 # 下载最新模型文件
 def download_latest_model_from_github():
     try:
@@ -333,8 +354,7 @@ if uploaded_file is not None:
     upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
 
     st.success("新模型已上传，并更新最新模型记录。")
-    
-        
+            
     # 调用函数生成图和结论
     analyze_data(data)
     generate_3d_scatter(data)
