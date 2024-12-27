@@ -106,7 +106,8 @@ uploaded_file = st.file_uploader("上传肩颈角度数据文件 (CSV 格式)", 
 if uploaded_file is not None:
     # 提取文件名并去掉扩展名
     file_name = os.path.splitext(uploaded_file.name)[0]
-    st.write(f"## {file_name} 人因分析")
+     # 使用 HTML 格式设置字体颜色为蓝色
+    st.markdown(f"<h3 style='color:blue;'>{file_name} 人因AI分析</h3>", unsafe_allow_html=True)
 
     # 读取数据
     data = pd.read_csv(uploaded_file)
