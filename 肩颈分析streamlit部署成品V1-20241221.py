@@ -124,10 +124,6 @@ simhei_font = font_manager.FontProperties(fname="simhei.ttf")
 plt.rcParams['font.family'] = simhei_font.get_name()  # 使用 SimHei 字体
 plt.rcParams['axes.unicode_minus'] = False  # 修复负号显示问题
 
-# 主逻辑开始
-try:
-    acquire_lock()  # 加锁
-    
 # Streamlit 标题
 st.title("肩颈角度分析与异常检测")
 st.write("本人因AI工具结合规则与机器学习模型，可以自动检测异常作业姿势并提供可视化分析。")
@@ -144,6 +140,10 @@ with open("肩颈角度数据模版.csv", "rb") as file:
 # 数据加载与预处理
 uploaded_file = st.file_uploader("上传肩颈角度数据文件 (CSV 格式)", type="csv")
 
+# 主逻辑开始
+try:
+    acquire_lock()  # 加锁
+    
 if uploaded_file is not None:
     data = pd.read_csv(uploaded_file)
     data.columns = ['天(d)', '时间(s)', '颈部角度(°)', '肩部上举角度(°)', 
@@ -455,5 +455,5 @@ if uploaded_file is not None:
     save_latest_model_path_to_cache(model_filename)  # 缓存本地最新路径
     wait_for_github_sync()
 
-    finally:
-        release_lock()  # 解锁
+finally:
+    release_lock()  # 解锁
