@@ -7,3 +7,4 @@ streamlit
 joblib
 streamlit-extras>=0.5.0
 PyGithub
+pdfkit
