@@ -455,5 +455,5 @@ if uploaded_file is not None:
     save_latest_model_path_to_cache(model_filename)  # 缓存本地最新路径
     wait_for_github_sync()
 
-finally:
-    release_lock()  # 解锁
+    finally:
+        release_lock()  # 解锁
