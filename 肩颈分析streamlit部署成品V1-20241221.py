@@ -36,25 +36,43 @@ timestamp = time.strftime("%Y%m%d_%H%M%S")
 model_filename = f"肩颈分析-模型-{timestamp}.joblib"
 
 # 上传文件到 GitHub
-def upload_file_to_github(file_path, github_path, commit_message):
+def upload_file_to_github(file_path, github_path, commit_message, retry_count=3, retry_wait=5):
+    """
+    上传文件到 GitHub，并处理同步延迟、冲突等问题。
+    :param file_path: 本地文件路径
+    :param github_path: GitHub 仓库中的目标路径
+    :param commit_message: 提交信息
+    :param retry_count: 重试次数
+    :param retry_wait: 重试等待时间（秒）
+    """
     try:
         g = Github(token)
         repo = g.get_repo(repo_name)
 
-        # 读取文件内容
+        # 读取本地文件内容
         with open(file_path, "rb") as f:
             content = f.read()
 
-        # 检查文件是否存在
-        try:
-            file = repo.get_contents(github_path)
-            repo.update_file(github_path, commit_message, content, file.sha)
-            st.success(f"文件已成功更新到 GitHub 仓库：{github_path}")
-        except:
-            repo.create_file(github_path, commit_message, content)
-            st.success(f"文件已成功上传到 GitHub 仓库：{github_path}")
+        # 上传或更新文件到 GitHub
+        for attempt in range(retry_count):
+            try:
+                # 检查文件是否存在
+                try:
+                    file = repo.get_contents(github_path)
+                    repo.update_file(github_path, commit_message, content, file.sha)
+                    st.success(f"文件已成功更新到 GitHub 仓库：{github_path}")
+                except:
+                    repo.create_file(github_path, commit_message, content)
+                    st.success(f"文件已成功上传到 GitHub 仓库：{github_path}")
+                return True
+            except Exception as e:
+                st.warning(f"第 {attempt + 1} 次上传失败，错误信息：{e}")
+                time.sleep(retry_wait)
+        st.error(f"多次尝试上传文件到 GitHub 失败：{github_path}")
+        return False
     except Exception as e:
         st.error(f"上传文件到 GitHub 失败：{e}")
+        return False
 
 # 下载最新模型文件
 def download_latest_model_from_github():
