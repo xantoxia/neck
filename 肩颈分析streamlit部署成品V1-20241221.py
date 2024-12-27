@@ -26,7 +26,6 @@ if not token:
     st.error("GitHub Token 未设置。请在 Streamlit Cloud 的 Secrets 中添加 GITHUB_TOKEN。")
     st.stop()
 
-
 # GitHub 配置
 LOCK_FILE = "/tmp/github_model_upload.lock"
 LATEST_MODEL_CACHE = "/tmp/latest_model_path.txt"
@@ -455,6 +454,7 @@ if uploaded_file is not None:
     st.success("模型已上传并更新最新记录！")
     save_latest_model_path_to_cache(model_filename)  # 缓存本地最新路径
     wait_for_github_sync()
-
+    
+except Exception as e: st.error(f"发生错误：{e}") 
 finally:
     release_lock()  # 解锁
