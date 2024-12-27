@@ -136,14 +136,15 @@ with open("肩颈角度数据模版.csv", "rb") as file:
         file_name="template.csv",
         mime="text/csv"
     )
-
-# 数据加载与预处理
-uploaded_file = st.file_uploader("上传肩颈角度数据文件 (CSV 格式)", type="csv")
-
+    
 # 主逻辑开始
 try:
     acquire_lock()  # 加锁
     
+# 数据加载与预处理
+uploaded_file = st.file_uploader("上传肩颈角度数据文件 (CSV 格式)", type="csv")
+
+
 if uploaded_file is not None:
     data = pd.read_csv(uploaded_file)
     data.columns = ['天(d)', '时间(s)', '颈部角度(°)', '肩部上举角度(°)', 
