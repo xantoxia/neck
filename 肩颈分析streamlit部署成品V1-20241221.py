@@ -434,11 +434,13 @@ def export_to_pdf():
 if st.button("下载分析结果为 PDF"):
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
+    pdf.add_font("SimHei", "", "SimHei.ttf", uni=True)  # 注册中文字体
+    pdf.set_font("SimHei", size=12)  # 设置字体为中文字体
+    
     pdf.cell(200, 10, txt=f"{file_name} 人因AI分析", ln=True, align='C')
     pdf.cell(200, 10, txt="1.1 数据预览", ln=True, align='L')
-    
-    # 添加数据表格
+
+    # 添加数据表格或内容
     for index, row in data_reset.iterrows():
         pdf.cell(200, 10, txt=str(row.values), ln=True, align='L')
 
