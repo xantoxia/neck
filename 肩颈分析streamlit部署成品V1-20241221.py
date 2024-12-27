@@ -104,9 +104,9 @@ with open("肩颈角度数据模版.csv", "rb") as file:
 uploaded_file = st.file_uploader("上传肩颈角度数据文件 (CSV 格式)", type="csv")
 
 if uploaded_file is not None:
-    # 提取文件名
-    file_name = uploaded_file.name
-    st.write(f"## {file_name} + 人因AI分析")
+    # 提取文件名并去掉扩展名
+    file_name = os.path.splitext(uploaded_file.name)[0]
+    st.write(f"## {file_name} 人因分析")
 
     # 读取数据
     data = pd.read_csv(uploaded_file)
