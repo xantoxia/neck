@@ -104,6 +104,11 @@ with open("肩颈角度数据模版.csv", "rb") as file:
 uploaded_file = st.file_uploader("上传肩颈角度数据文件 (CSV 格式)", type="csv")
 
 if uploaded_file is not None:
+    # 提取文件名
+    file_name = uploaded_file.name
+    st.write(f"## {file_name} + 人因AI分析")
+
+    # 读取数据
     data = pd.read_csv(uploaded_file)
     data.columns = ['天(d)', '时间(s)', '颈部角度(°)', '肩部上举角度(°)', 
                     '肩部外展/内收角度(°)', '肩部旋转角度(°)']
