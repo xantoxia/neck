@@ -19,6 +19,7 @@ from sklearn.metrics import classification_report, roc_curve, auc
 from joblib import dump, load
 from matplotlib import font_manager
 from github import Github
+from fpdf import FPDF
 
 # 动态读取Token
 token = os.getenv("GITHUB_TOKEN")
@@ -430,10 +431,25 @@ def export_to_pdf():
     return pdf
 
     # 添加下载按钮
-    pdf_data = export_to_pdf()
-    st.download_button(
-        label="下载页面内容为 PDF 文件",
-        data=pdf_data,
-        file_name="streamlit_page.pdf",
-        mime="application/pdf"
-    )
+if st.button("下载分析结果为 PDF"):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt=f"{file_name} 人因AI分析", ln=True, align='C')
+    pdf.cell(200, 10, txt="1.1 数据预览", ln=True, align='L')
+    
+    # 添加数据表格
+    for index, row in data_reset.iterrows():
+        pdf.cell(200, 10, txt=str(row.values), ln=True, align='L')
+
+    pdf_file_name = f"{file_name} 人因AI分析.pdf"
+    pdf.output(pdf_file_name)
+
+    # 提供下载按钮
+    with open(pdf_file_name, "rb") as pdf_file:
+        st.download_button(
+            label="下载 PDF 文件",
+            data=pdf_file,
+            file_name=pdf_file_name,
+            mime="application/pdf"
+        )
