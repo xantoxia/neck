@@ -12,6 +12,7 @@ import seaborn as sns
 import streamlit as st
 import time
 import os
+import pdfkit
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, auc
@@ -415,3 +416,18 @@ if uploaded_file is not None:
         f.write(model_filename)
     upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
     st.success("新模型已上传，并更新最新模型记录。")
+
+def export_to_pdf():
+    # 生成当前页面内容为 PDF
+    html = "<html><body>" + st._global_context._last_marshalled_state + "</body></html>"  # 获取页面 HTML
+    pdf = pdfkit.from_string(html, False)
+    return pdf
+
+    # 添加下载按钮
+    pdf_data = export_to_pdf()
+    st.download_button(
+        label="下载页面内容为 PDF 文件",
+        data=pdf_data,
+        file_name="streamlit_page.pdf",
+        mime="application/pdf"
+    )
