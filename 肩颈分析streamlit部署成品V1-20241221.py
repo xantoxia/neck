@@ -12,6 +12,7 @@ import seaborn as sns
 import streamlit as st
 import time
 import os
+import uuid
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, auc
@@ -25,38 +26,63 @@ if not token:
     st.error("GitHub Token 未设置。请在 Streamlit Cloud 的 Secrets 中添加 GITHUB_TOKEN。")
     st.stop()
 
+
 # GitHub 配置
+LOCK_FILE = "/tmp/github_model_upload.lock"
+LATEST_MODEL_CACHE = "/tmp/latest_model_path.txt"
+
+# 动态读取Token
+token = os.getenv("GITHUB_TOKEN")
+if not token:
+    st.error("GitHub Token 未设置。请在 Streamlit Cloud 的 Secrets 中添加 GITHUB_TOKEN。")
+    st.stop()
+
 repo_name = "xantoxia/neck"  # 替换为你的 GitHub 仓库
 models_folder = "models/"  # GitHub 仓库中模型文件存储路径
 latest_model_file = "latest_model_info.txt"  # 最新模型信息文件
 commit_message = "更新模型文件"  # 提交信息
 
-# 定义带时间戳的备份文件名
-timestamp = time.strftime("%Y%m%d_%H%M%S")
-model_filename = f"肩颈分析-模型-{timestamp}.joblib"
+# 生成唯一模型文件名
+model_filename = f"肩颈分析-模型-{uuid.uuid4().hex[:8]}.joblib"
+
+# 加锁函数
+def acquire_lock():
+    if os.path.exists(LOCK_FILE):
+        st.error("另一个任务正在运行，请稍后再试。")
+        st.stop()
+    open(LOCK_FILE, 'w').close()
+
+def release_lock():
+    if os.path.exists(LOCK_FILE):
+        os.remove(LOCK_FILE)
+
+# 本地缓存最新模型文件路径
+def save_latest_model_path_to_cache(path):
+    with open(LATEST_MODEL_CACHE, "w") as f:
+        f.write(path)
+
+def load_latest_model_path_from_cache():
+    if os.path.exists(LATEST_MODEL_CACHE):
+        with open(LATEST_MODEL_CACHE, "r") as f:
+            return f.read().strip()
+    return None
+
+# 等待GitHub同步
+def wait_for_github_sync(delay=3):
+    st.info(f"等待 {delay} 秒以确保 GitHub 文件同步...")
+    time.sleep(delay)
 
 # 上传文件到 GitHub
 def upload_file_to_github(file_path, github_path, commit_message, retry_count=3, retry_wait=5):
-    """
-    上传文件到 GitHub，并处理同步延迟、冲突等问题。
-    :param file_path: 本地文件路径
-    :param github_path: GitHub 仓库中的目标路径
-    :param commit_message: 提交信息
-    :param retry_count: 重试次数
-    :param retry_wait: 重试等待时间（秒）
-    """
     try:
         g = Github(token)
         repo = g.get_repo(repo_name)
 
-        # 读取本地文件内容
         with open(file_path, "rb") as f:
             content = f.read()
 
-        # 上传或更新文件到 GitHub
         for attempt in range(retry_count):
             try:
-                # 检查文件是否存在
                 try:
                     file = repo.get_contents(github_path)
                     repo.update_file(github_path, commit_message, content, file.sha)
@@ -80,23 +106,17 @@ def download_latest_model_from_github():
         g = Github(token)
         repo = g.get_repo(repo_name)
 
-        # 获取最新模型信息
-        try:
-            latest_info = repo.get_contents(models_folder + latest_model_file).decoded_content.decode()
-            latest_model_path = models_folder + latest_info.strip()
-            st.write(f"最新模型路径：{latest_model_path}")
+        latest_info = repo.get_contents(models_folder + latest_model_file).decoded_content.decode().strip()
+        latest_model_path = models_folder + latest_info
+        st.write(f"最新模型路径：{latest_model_path}")
 
-            # 下载最新模型文件
-            file_content = repo.get_contents(latest_model_path)
-            with open("/tmp/latest_model.joblib", "wb") as f:
-                f.write(file_content.decoded_content)
-            st.success("成功下载最新模型！")
-            return "/tmp/latest_model.joblib"
-        except:
-            st.warning("未找到最新模型信息文件，无法下载模型。")
-            return None
-    except Exception as e:
-        st.error(f"从 GitHub 下载模型失败：{e}")
+        file_content = repo.get_contents(latest_model_path)
+        with open("/tmp/latest_model.joblib", "wb") as f:
+            f.write(file_content.decoded_content)
+        st.success("成功下载最新模型！")
+        return "/tmp/latest_model.joblib"
+    except:
+        st.warning("未找到最新模型信息文件，无法下载模型。")
         return None
 
 # 设置中文字体
@@ -104,6 +124,10 @@ simhei_font = font_manager.FontProperties(fname="simhei.ttf")
 plt.rcParams['font.family'] = simhei_font.get_name()  # 使用 SimHei 字体
 plt.rcParams['axes.unicode_minus'] = False  # 修复负号显示问题
 
+# 主逻辑开始
+try:
+    acquire_lock()  # 加锁
+    
 # Streamlit 标题
 st.title("肩颈角度分析与异常检测")
 st.write("本人因AI工具结合规则与机器学习模型，可以自动检测异常作业姿势并提供可视化分析。")
@@ -421,15 +445,15 @@ if uploaded_file is not None:
     # 保存新模型到临时文件夹
     local_model_path = f"/tmp/{model_filename}"
     dump(model, local_model_path)
-    st.write("模型已训练并保存到本地临时路径。")
-
-    # 上传新模型到 GitHub
     upload_file_to_github(local_model_path, models_folder + model_filename, commit_message)
-    st.write("模型已保存并上传到 GitHub。")
-    
-    # 更新最新模型信息
-    latest_info_path = "/tmp/" + latest_model_file
-    with open(latest_info_path, "w") as f:
+
+    with open("/tmp/" + latest_model_file, "w") as f:
         f.write(model_filename)
-    upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
-    st.success("新模型已上传，并更新最新模型记录。")
+    upload_file_to_github("/tmp/" + latest_model_file, models_folder + latest_model_file, "更新最新模型信息")
+
+    st.success("模型已上传并更新最新记录！")
+    save_latest_model_path_to_cache(model_filename)  # 缓存本地最新路径
+    wait_for_github_sync()
+
+finally:
+    release_lock()  # 解锁
