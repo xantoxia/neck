@@ -424,34 +424,5 @@ if uploaded_file is not None:
     upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
     st.success("新模型已上传，并更新最新模型记录。")
 
-def export_to_pdf():
-    # 生成当前页面内容为 PDF
-    html = "<html><body>" + st._global_context._last_marshalled_state + "</body></html>"  # 获取页面 HTML
-    pdf = pdfkit.from_string(html, False)
-    return pdf
-
-    # 添加下载按钮
-if st.button("下载分析结果为 PDF"):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.add_font("SimHei", "", "SimHei.ttf", uni=True)  # 注册中文字体
-    pdf.set_font("SimHei", size=12)  # 设置字体为中文字体
-    
-    pdf.cell(200, 10, txt=f"{file_name} 人因AI分析", ln=True, align='C')
-    pdf.cell(200, 10, txt="1.1 数据预览", ln=True, align='L')
-
-    # 添加数据表格或内容
-    for index, row in data_reset.iterrows():
-        pdf.cell(200, 10, txt=str(row.values), ln=True, align='L')
-
-    pdf_file_name = f"{file_name} 人因AI分析.pdf"
-    pdf.output(pdf_file_name)
-
-    # 提供下载按钮
-    with open(pdf_file_name, "rb") as pdf_file:
-        st.download_button(
-            label="下载 PDF 文件",
-            data=pdf_file,
-            file_name=pdf_file_name,
-            mime="application/pdf"
-        )
+    st.write("#### 页面导出")
+    st.info("如需导出页面为 PDF 文件，请在浏览器中按 `Ctrl+P`（或 `Command+P`），然后选择打印为 PDF。")
