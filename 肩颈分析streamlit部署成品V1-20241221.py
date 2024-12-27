@@ -424,5 +424,20 @@ if uploaded_file is not None:
     upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
     st.success("新模型已上传，并更新最新模型记录。")
 
+    # 在 Streamlit 页面顶部插入自定义打印样式
+    st.markdown("""
+        <style>
+        /* 移除滚动条，打印所有内容 */
+        @media print {
+            body {
+                overflow: visible !important;
+            }
+            .main {
+                overflow: visible !important;
+            }
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
     st.write("#### 页面导出")
     st.info("如需导出页面为 PDF 文件，请在浏览器中按 `Ctrl+P`（或 `Command+P`），然后选择打印为 PDF。")
