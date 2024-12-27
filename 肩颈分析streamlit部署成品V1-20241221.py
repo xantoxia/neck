@@ -266,7 +266,7 @@ if uploaded_file is not None:
                 st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
                 abnormal_indices.append(index)
             elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
-                st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，需评估规则的适用性。")
+                st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
                 abnormal_indices.append(index)
             else:
                 st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
@@ -293,7 +293,7 @@ if uploaded_file is not None:
                         st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
                         abnormal_indices.append(index)
                     elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
-                        st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，需评估规则的适用性。")
+                        st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
                         abnormal_indices.append(index)
                     else:
                         st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
@@ -317,7 +317,7 @@ if uploaded_file is not None:
                 st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
                 abnormal_indices.append(index)
             elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
-                st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，需评估规则的适用性。")
+                st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
                 abnormal_indices.append(i
             else:
                 st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
