@@ -254,8 +254,13 @@ if uploaded_file is not None:
 
         feature_importances = model.feature_importances_
         st.write("#### 3.2  机器学习特征重要性")
+        
         for name, importance in zip(X.columns, feature_importances):
             st.write(f"- {name}: {importance:.4f}")
+
+        st.write("### Debug Info")
+        st.write("Feature Names in X: ", X.columns)
+        st.write("Feature Importances: ", feature_importances)
 
         abnormal_indices = []
         st.write("### 3.3  作业姿势AI模型检测结果")
