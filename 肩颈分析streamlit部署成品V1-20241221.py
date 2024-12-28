@@ -33,7 +33,7 @@ commit_message = "从Streamlit更新模型文件"  # 提交信息
 
 # 定义带时间戳的备份文件名
 timestamp = time.strftime("%Y%m%d_%H%M%S")
-model_filename = f"肩颈分析-模型-{timestamp}.joblib"
+model_filename = f"jianjing-model-{timestamp}.joblib"
 
 # 上传文件到 GitHub
 def upload_file_to_github(file_path, github_path, commit_message):
