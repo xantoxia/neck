@@ -111,8 +111,14 @@ if uploaded_file is not None:
 
     # 读取数据
     data = pd.read_csv(uploaded_file)
-    data.columns = [ '时间(s)', '颈部角度(°)', '肩部前屈角度(°)', 
-                    '肩部外展角度(°)', '肩部旋转角度(°)']
+    data.columns = [
+        '时间(s)', 
+        '颈部角度(°)', 
+        '肩部前屈角度(°)', 
+        '肩部外展角度(°)', 
+        '肩部旋转角度(°)'
+    ]
+    
     st.write("### 1.1  数据预览")
     
     # 调整序号显示，从 1 开始
