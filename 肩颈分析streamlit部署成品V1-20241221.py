@@ -12,14 +12,12 @@ import seaborn as sns
 import streamlit as st
 import time
 import os
-import pdfkit
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, auc
 from joblib import dump, load
 from matplotlib import font_manager
 from github import Github
-from fpdf import FPDF
 
 # 动态读取Token
 token = os.getenv("GITHUB_TOKEN")
@@ -424,20 +422,5 @@ if uploaded_file is not None:
     upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
     st.success("新模型已上传，并更新最新模型记录。")
     
-    # 在 Streamlit 页面插入自定义保存样式
-    st.markdown("""
-        <style>
-        /* 移除滚动条，保存所有内容 */
-        @media print {
-            body {
-                overflow: visible !important;
-            }
-            .main {
-                overflow: visible !important;
-            }
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
     st.write("#### 页面导出")
     st.info("如需导出页面为 html 文件，请在浏览器中按 `Ctrl+S`，然后进行保存。")
