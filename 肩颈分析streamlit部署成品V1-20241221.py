@@ -87,7 +87,7 @@ plt.rcParams['font.family'] = simhei_font.get_name()  # 使用 SimHei 字体
 plt.rcParams['axes.unicode_minus'] = False  # 修复负号显示问题
 
 # Streamlit 标题
-st.title("肩颈角度分析与异常检测")
+st.title("肩颈角度分析与作业姿势异常检测")
 st.write("本人因AI工具结合规则与机器学习模型，可以自动检测异常作业姿势并提供可视化分析。")
 
 # 模板下载
@@ -257,10 +257,6 @@ if uploaded_file is not None:
         
         for name, importance in zip(X.columns, feature_importances):
             st.write(f"- {name}: {importance:.4f}")
-
-        st.write("### Debug Info")
-        st.write("Feature Names in X: ", X.columns)
-        st.write("Feature Importances: ", feature_importances)
 
         abnormal_indices = []
         st.write("### 3.3  作业姿势AI模型检测结果")
