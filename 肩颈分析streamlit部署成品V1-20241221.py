@@ -423,3 +423,21 @@ if uploaded_file is not None:
         f.write(model_filename)
     upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
     st.success("新模型已上传，并更新最新模型记录。")
+    
+    # 在 Streamlit 页面插入自定义保存样式
+    st.markdown("""
+        <style>
+        /* 移除滚动条，保存所有内容 */
+        @media print {
+            body {
+                overflow: visible !important;
+            }
+            .main {
+                overflow: visible !important;
+            }
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.write("#### 页面导出")
+    st.info("如需导出页面为 html 文件，请在浏览器中按 `Ctrl+S`，然后进行保存。")
