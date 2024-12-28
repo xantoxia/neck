@@ -12,12 +12,14 @@ import seaborn as sns
 import streamlit as st
 import time
 import os
+import pdfkit
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, auc
 from joblib import dump, load
 from matplotlib import font_manager
 from github import Github
+from fpdf import FPDF
 
 # 动态读取Token
 token = os.getenv("GITHUB_TOKEN")
@@ -33,7 +35,7 @@ commit_message = "从Streamlit更新模型文件"  # 提交信息
 
 # 定义带时间戳的备份文件名
 timestamp = time.strftime("%Y%m%d_%H%M%S")
-model_filename = f"jianjing-model-{timestamp}.joblib"
+model_filename = f"肩颈分析-模型-{timestamp}.joblib"
 
 # 上传文件到 GitHub
 def upload_file_to_github(file_path, github_path, commit_message):
@@ -103,22 +105,15 @@ with open("肩颈角度数据模版.csv", "rb") as file:
 uploaded_file = st.file_uploader("上传肩颈角度数据文件 (CSV 格式)", type="csv")
 
 if uploaded_file is not None:
-
     # 提取文件名并去掉扩展名
     csv_file_name = os.path.splitext(uploaded_file.name)[0]
-    # 使用 HTML 格式设置字体颜色为蓝色
+     # 使用 HTML 格式设置字体颜色为蓝色
     st.markdown(f"<h3 style='color:blue;'>{csv_file_name} 肩颈作业姿势分析</h3>", unsafe_allow_html=True)
 
     # 读取数据
     data = pd.read_csv(uploaded_file)
-    data.columns = [
-        '时间(s)', 
-        '颈部角度(°)', 
-        '肩部前屈角度(°)', 
-        '肩部外展角度(°)', 
-        '肩部旋转角度(°)'
-    ]
-    
+    data.columns = ['工站(w)', '时间(s)', '颈部角度(°)', '肩部前屈角度(°)', 
+                    '肩部外展角度(°)', '肩部旋转角度(°)']
     st.write("### 1.1  数据预览")
     
     # 调整序号显示，从 1 开始
@@ -254,8 +249,7 @@ if uploaded_file is not None:
 
         feature_importances = model.feature_importances_
         st.write("#### 3.2  机器学习特征重要性")
-        
-        for name, importance in zip(X.columns, feature_importances):
+        for name, importance in zip(data.columns[2:], feature_importances):
             st.write(f"- {name}: {importance:.4f}")
 
         abnormal_indices = []
@@ -278,6 +272,9 @@ if uploaded_file is not None:
                 abnormal_indices.append(index)
             elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
                 st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
+                abnormal_indices.append(index)
+            elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
+                st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
                 abnormal_indices.append(index)
             else:
                 st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
@@ -303,6 +300,9 @@ if uploaded_file is not None:
                     elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
                         st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
                         abnormal_indices.append(index)
+                    elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
+                        st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
+                        abnormal_indices.append(index)
                     else:
                         st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
         
@@ -323,6 +323,9 @@ if uploaded_file is not None:
                 abnormal_indices.append(index)
             elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
                 st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
+                abnormal_indices.append(index)
+            elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
+                st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
                 abnormal_indices.append(index)
             else:
                 st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
@@ -418,7 +421,7 @@ if uploaded_file is not None:
     latest_info_path = "/tmp/" + latest_model_file
     with open(latest_info_path, "w") as f:
         f.write(model_filename)
-    upload_file_to_github(latest_info_path, models_folder + latest_model_file, commit_message)
+    upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
     st.success("新模型已上传，并更新最新模型记录。")
     
     # 在 Streamlit 页面插入自定义保存样式
