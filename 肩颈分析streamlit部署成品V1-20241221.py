@@ -31,7 +31,7 @@ if not token:
 repo_name = "xantoxia/neck"  # 替换为你的 GitHub 仓库
 models_folder = "models/"  # GitHub 仓库中模型文件存储路径
 latest_model_file = "latest_model_info.txt"  # 最新模型信息文件
-commit_message = "更新模型文件"  # 提交信息
+commit_message = "从Streamlit更新模型文件"  # 提交信息
 
 # 定义带时间戳的备份文件名
 timestamp = time.strftime("%Y%m%d_%H%M%S")
@@ -108,7 +108,7 @@ if uploaded_file is not None:
     # 提取文件名并去掉扩展名
     csv_file_name = os.path.splitext(uploaded_file.name)[0]
      # 使用 HTML 格式设置字体颜色为蓝色
-    st.markdown(f"<h3 style='color:blue;'>{csv_file_name} 人因AI分析</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='color:blue;'>{csv_file_name} 肩颈作业姿势分析</h3>", unsafe_allow_html=True)
 
     # 读取数据
     data = pd.read_csv(uploaded_file)
@@ -423,21 +423,3 @@ if uploaded_file is not None:
         f.write(model_filename)
     upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
     st.success("新模型已上传，并更新最新模型记录。")
-
-    # 在 Streamlit 页面顶部插入自定义打印样式
-    st.markdown("""
-        <style>
-        /* 移除滚动条，打印所有内容 */
-        @media print {
-            body {
-                overflow: visible !important;
-            }
-            .main {
-                overflow: visible !important;
-            }
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    st.write("#### 页面导出")
-    st.info("如需导出页面为 html 文件，请在浏览器中按 `Ctrl+S`，然后进行保存。")
