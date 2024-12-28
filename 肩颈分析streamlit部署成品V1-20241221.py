@@ -194,9 +194,9 @@ if uploaded_file is not None:
             st.write("- 颈部角度与肩部前屈角度存在一定程度的正相关，但相关性较弱，协同性可能较低。")
 
         if corr['肩部旋转角度(°)']['肩部外展角度(°)'] < 0:
-            st.write("- 肩部旋转与外展/内收角度存在负相关，可能是补偿动作的表现。")
+            st.write("- 肩部旋转与外展角度存在负相关，可能是补偿动作的表现。")
         elif 0 <= corr['肩部旋转角度(°)']['肩部外展角度(°)'] <= 0.5:
-            st.write("- 肩部旋转与外展/内收角度存在弱正相关，可能与动作的协调性有关，但关联较弱。")
+            st.write("- 肩部旋转与外展角度存在弱正相关，可能与动作的协调性有关，但关联较弱。")
             
     # 肩颈角度时间变化散点图
     def generate_scatter_plots(data):
@@ -411,7 +411,7 @@ if uploaded_file is not None:
     latest_info_path = "/tmp/" + latest_model_file
     with open(latest_info_path, "w") as f:
         f.write(model_filename)
-    upload_file_to_github(latest_info_path, models_folder + latest_model_file, "更新最新模型信息")
+    upload_file_to_github(latest_info_path, models_folder + latest_model_file, commit_message)
     st.success("新模型已上传，并更新最新模型记录。")
     
     # 在 Streamlit 页面插入自定义保存样式
