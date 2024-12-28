@@ -248,7 +248,7 @@ if uploaded_file is not None:
 
         feature_importances = model.feature_importances_
         st.write("#### 3.2  机器学习特征重要性")
-        for name, importance in zip(data.columns[1:], feature_importances):
+        for name, importance in zip(data.columns[0:], feature_importances):
             st.write(f"- {name}: {importance:.4f}")
 
         abnormal_indices = []
