@@ -1,1 +1,1 @@
-jianjing-model-20241228_070817.joblib
+肩颈分析-模型-20241228_074523.joblib
