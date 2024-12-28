@@ -84,7 +84,7 @@ def download_latest_model_from_github():
         return None
 
 # 设置中文字体
-simhei_font = font_manager.FontProperties(fname="simhei.ttf")
+simhei_font = font_manager.FontProperties(fname="SimHei.ttf")
 plt.rcParams['font.family'] = simhei_font.get_name()  # 使用 SimHei 字体
 plt.rcParams['axes.unicode_minus'] = False  # 修复负号显示问题
 
@@ -106,9 +106,9 @@ uploaded_file = st.file_uploader("上传肩颈角度数据文件 (CSV 格式)", 
 
 if uploaded_file is not None:
     # 提取文件名并去掉扩展名
-    file_name = os.path.splitext(uploaded_file.name)[0]
+    csv_file_name = os.path.splitext(uploaded_file.name)[0]
      # 使用 HTML 格式设置字体颜色为蓝色
-    st.markdown(f"<h3 style='color:blue;'>{file_name} 人因AI分析</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='color:blue;'>{csv_file_name} 人因AI分析</h3>", unsafe_allow_html=True)
 
     # 读取数据
     data = pd.read_csv(uploaded_file)
@@ -440,4 +440,4 @@ if uploaded_file is not None:
     """, unsafe_allow_html=True)
 
     st.write("#### 页面导出")
-    st.info("如需导出页面为 PDF 文件，请在浏览器中按 `Ctrl+P`（或 `Command+P`），然后选择打印为 PDF。")
+    st.info("如需导出页面为 html 文件，请在浏览器中按 `Ctrl+S`，然后进行保存。")
