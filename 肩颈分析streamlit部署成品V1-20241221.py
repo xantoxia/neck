@@ -12,14 +12,12 @@ import seaborn as sns
 import streamlit as st
 import time
 import os
-import pdfkit
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, auc
 from joblib import dump, load
 from matplotlib import font_manager
 from github import Github
-from fpdf import FPDF
 
 # 动态读取Token
 token = os.getenv("GITHUB_TOKEN")
@@ -89,7 +87,7 @@ plt.rcParams['font.family'] = simhei_font.get_name()  # 使用 SimHei 字体
 plt.rcParams['axes.unicode_minus'] = False  # 修复负号显示问题
 
 # Streamlit 标题
-st.title("肩颈角度分析与异常检测")
+st.title("肩颈角度自动分析与异常检测")
 st.write("本人因AI工具结合规则与机器学习模型，可以自动检测异常作业姿势并提供可视化分析。")
 
 # 模板下载
@@ -105,9 +103,10 @@ with open("肩颈角度数据模版.csv", "rb") as file:
 uploaded_file = st.file_uploader("上传肩颈角度数据文件 (CSV 格式)", type="csv")
 
 if uploaded_file is not None:
+
     # 提取文件名并去掉扩展名
     csv_file_name = os.path.splitext(uploaded_file.name)[0]
-     # 使用 HTML 格式设置字体颜色为蓝色
+    # 使用 HTML 格式设置字体颜色为蓝色
     st.markdown(f"<h3 style='color:blue;'>{csv_file_name} 肩颈作业姿势分析</h3>", unsafe_allow_html=True)
 
     # 读取数据
@@ -273,9 +272,6 @@ if uploaded_file is not None:
             elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
                 st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
                 abnormal_indices.append(index)
-            elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
-                st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
-                abnormal_indices.append(index)
             else:
                 st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
 
@@ -300,9 +296,6 @@ if uploaded_file is not None:
                     elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
                         st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
                         abnormal_indices.append(index)
-                    elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
-                        st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
-                        abnormal_indices.append(index)
                     else:
                         st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
         
@@ -323,9 +316,6 @@ if uploaded_file is not None:
                 abnormal_indices.append(index)
             elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
                 st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
-                abnormal_indices.append(index)
-            elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
-                st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
                 abnormal_indices.append(index)
             else:
                 st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
