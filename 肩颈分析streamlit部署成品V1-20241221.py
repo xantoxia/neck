@@ -376,7 +376,7 @@ if uploaded_file is not None:
                                
     st.write("### 3.4  AI模型质量评估")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-    y_pred = model.predict(X_test)
+    y_pred = predict_with_threshold(X_test, model)
     y_prob = model.predict_proba(X_test)[:, 1]
     fpr, tpr, thresholds = roc_curve(y_test, y_prob)
     roc_auc = auc(fpr, tpr)
