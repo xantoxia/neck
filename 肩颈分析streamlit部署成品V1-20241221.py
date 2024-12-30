@@ -348,7 +348,10 @@ if uploaded_file is not None:
         np.random.seed(42)
         data['Label'] = np.random.choice([0, 1], size=len(data))
     y = data['Label']
-    
+
+    # 数据预处理：重新定义标签
+    data['Label'] = ((data['颈部角度(°)'] > 20) | (data['Label'] == 1)).astype(int)
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     model.fit(X_train, y_train)   
            
