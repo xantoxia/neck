@@ -375,7 +375,9 @@ if uploaded_file is not None:
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     model.fit(X_train, y_train)   
-           
+    y_pred = (model.predict_proba(X_test)[:, 1] >= 0.4).astype(int)
+    y_prob = model.predict_proba(X_test)[:, 1]
+               
     # 调用函数生成图和结论
     analyze_data(data)
     generate_3d_scatter(data)
