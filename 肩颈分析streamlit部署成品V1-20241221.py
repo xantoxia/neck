@@ -351,7 +351,17 @@ if uploaded_file is not None:
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     model.fit(X_train, y_train)   
-           
+
+    # 引入固定阈值的规则
+    def predict_with_threshold(X, model):
+        predictions = model.predict(X)
+        # 应用固定规则：颈部角度 > 20° -> 异常
+        predictions[X['颈部角度(°)'] > 20] = 1
+        return predictions
+
+    # 测试模型
+    y_pred = predict_with_threshold(X_test, model)
+
     # 调用函数生成图和结论
     analyze_data(data)
     generate_3d_scatter(data)
