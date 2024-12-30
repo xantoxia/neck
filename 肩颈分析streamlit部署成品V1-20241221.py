@@ -259,12 +259,11 @@ if uploaded_file is not None:
 
     # 综合分析
     def comprehensive_analysis(data, model):
-        neck_threshold = data['颈部角度(°)'].mean() + data['颈部角度(°)'].std()
-        shoulder_threshold = data['肩部旋转角度(°)'].mean() + data['肩部旋转角度(°)'].std()
+        # 固定规则：颈部角度大于20°为异常
+        neck_threshold = 20.0  # 固定值
 
         st.write("### 3.1  AI模型综合分析结果")
         st.write(f"- **动态阈值**：颈部角度 > {neck_threshold:.2f}° 为异常")
-        st.write(f"- **动态阈值**：肩部旋转 > {shoulder_threshold:.2f}° 为异常")
 
         feature_importances = model.feature_importances_
         st.write("#### 3.2  机器学习特征重要性")
@@ -280,8 +279,6 @@ if uploaded_file is not None:
             rule_based_conclusion = "正常"
             if row['颈部角度(°)'] > neck_threshold:
                 rule_based_conclusion = "颈部角度异常"
-            elif row['肩部旋转角度(°)'] > shoulder_threshold:
-                rule_based_conclusion = "肩部旋转角度异常"
 
             ml_conclusion = "异常" if model.predict([[row['颈部角度(°)'], row['肩部前屈角度(°)'], 
                                                       row['肩部外展角度(°)'], row['肩部旋转角度(°)']]])[0] == 1 else "正常"
@@ -307,8 +304,6 @@ if uploaded_file is not None:
                     rule_based_conclusion = "正常"
                     if row['颈部角度(°)'] > neck_threshold:
                         rule_based_conclusion = "颈部角度异常"
-                    elif row['肩部旋转角度(°)'] > shoulder_threshold:
-                        rule_based_conclusion = "肩部旋转角度异常"
 
                     ml_conclusion = "异常" if model.predict([[row['颈部角度(°)'], row['肩部前屈角度(°)'], 
                                                               row['肩部外展角度(°)'], row['肩部旋转角度(°)']]])[0] == 1 else "正常"
@@ -331,8 +326,6 @@ if uploaded_file is not None:
             rule_based_conclusion = "正常"
             if row['颈部角度(°)'] > neck_threshold:
                 rule_based_conclusion = "颈部角度异常"
-            elif row['肩部旋转角度(°)'] > shoulder_threshold:
-                rule_based_conclusion = "肩部旋转角度异常"
 
             ml_conclusion = "异常" if model.predict([[row['颈部角度(°)'], row['肩部前屈角度(°)'], 
                                                       row['肩部外展角度(°)'], row['肩部旋转角度(°)']]])[0] == 1 else "正常"
