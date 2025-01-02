@@ -259,11 +259,12 @@ if uploaded_file is not None:
 
     # 综合分析
     def comprehensive_analysis(data, model):
-        # 固定规则：颈部角度大于20°为异常
-        neck_threshold = 20.0  # 固定值
+        neck_threshold = data['颈部角度(°)'].mean() + data['颈部角度(°)'].std()
+        shoulder_threshold = data['肩部旋转角度(°)'].mean() + data['肩部旋转角度(°)'].std()
 
         st.write("### 3.1  AI模型综合分析结果")
         st.write(f"- **动态阈值**：颈部角度 > {neck_threshold:.2f}° 为异常")
+        st.write(f"- **动态阈值**：肩部旋转 > {shoulder_threshold:.2f}° 为异常")
 
         feature_importances = model.feature_importances_
         st.write("#### 3.2  机器学习特征重要性")
@@ -279,9 +280,11 @@ if uploaded_file is not None:
             rule_based_conclusion = "正常"
             if row['颈部角度(°)'] > neck_threshold:
                 rule_based_conclusion = "颈部角度异常"
+            elif row['肩部旋转角度(°)'] > shoulder_threshold:
+                rule_based_conclusion = "肩部旋转角度异常"
 
-            # 仅使用颈部角度作为输入特征
-            ml_conclusion = "异常" if model.predict([[row['颈部角度(°)']]])[0] == 1 else "正常"
+            ml_conclusion = "异常" if model.predict([[row['颈部角度(°)'], row['肩部前屈角度(°)'], 
+                                                      row['肩部外展角度(°)'], row['肩部旋转角度(°)']]])[0] == 1 else "正常"
 
             if rule_based_conclusion == "正常" and ml_conclusion == "异常":
                 st.write(f"- 第 {index+1} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
@@ -304,9 +307,11 @@ if uploaded_file is not None:
                     rule_based_conclusion = "正常"
                     if row['颈部角度(°)'] > neck_threshold:
                         rule_based_conclusion = "颈部角度异常"
+                    elif row['肩部旋转角度(°)'] > shoulder_threshold:
+                        rule_based_conclusion = "肩部旋转角度异常"
 
-                    # 仅使用颈部角度作为输入特征
-                    ml_conclusion = "异常" if model.predict([[row['颈部角度(°)']]])[0] == 1 else "正常"
+                    ml_conclusion = "异常" if model.predict([[row['颈部角度(°)'], row['肩部前屈角度(°)'], 
+                                                              row['肩部外展角度(°)'], row['肩部旋转角度(°)']]])[0] == 1 else "正常"
 
                     if rule_based_conclusion == "正常" and ml_conclusion == "异常":
                         st.write(f"- 第 {index+1} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
@@ -326,9 +331,11 @@ if uploaded_file is not None:
             rule_based_conclusion = "正常"
             if row['颈部角度(°)'] > neck_threshold:
                 rule_based_conclusion = "颈部角度异常"
+            elif row['肩部旋转角度(°)'] > shoulder_threshold:
+                rule_based_conclusion = "肩部旋转角度异常"
 
-            # 仅使用颈部角度作为输入特征
-            ml_conclusion = "异常" if model.predict([[row['颈部角度(°)']]])[0] == 1 else "正常"
+            ml_conclusion = "异常" if model.predict([[row['颈部角度(°)'], row['肩部前屈角度(°)'], 
+                                                      row['肩部外展角度(°)'], row['肩部旋转角度(°)']]])[0] == 1 else "正常"
 
             if rule_based_conclusion == "正常" and ml_conclusion == "异常":
                 st.write(f"- 第 {index+1} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
@@ -357,7 +364,7 @@ if uploaded_file is not None:
         st.write("未加载到模型，训练新模型...")
 
     # 模型训练或重新训练
-    X = data[['颈部角度(°)']]  # 只使用颈部角度作为特征
+    X = data[['颈部角度(°)', '肩部前屈角度(°)', '肩部外展角度(°)', '肩部旋转角度(°)']]
     if 'Label' not in data.columns:
         np.random.seed(42)
         data['Label'] = np.random.choice([0, 1], size=len(data))
