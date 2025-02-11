@@ -111,248 +111,356 @@ if uploaded_file is not None:
     # 读取数据
     data = pd.read_csv(uploaded_file)
     data.columns = ['工站(w)', '时间(s)', '颈部角度(°)', '肩部前屈角度(°)', 
-                    '肩部外展角度(°)', '肩部旋转角度(°)']
+                    '肩部外展角度(°)']
+
+    # 显示数据预览
     st.write("### 1.1  数据预览")
-    
-    # 调整序号显示，从 1 开始
-    data_reset = data.copy()  # 复制原始数据
-    data_reset.index += 1  # 将索引从 1 开始
-    data_reset.index.name = "序号"  # 为索引命名为 "序号"
-
-    # 在 Streamlit 显示数据预览
+    data_reset = data.copy()
+    data_reset.index += 1
+    data_reset.index.name = "序号"
     st.write(data_reset.head())
-       
-    # 数据统计分析函数
-    def analyze_data(data):
-        st.write("### 1.2  数据统计分析")
-        stats = data.describe()
-        st.write(stats)
 
-        st.write("### 1.3  动态分析结论：数据统计特性")
-        st.write(f"- 颈部角度范围：{stats['颈部角度(°)']['min']}° 至 {stats['颈部角度(°)']['max']}°，平均值为 {stats['颈部角度(°)']['mean']:.2f}°")
-        st.write(f"- 肩部旋转角度范围：{stats['肩部旋转角度(°)']['min']}° 至 {stats['肩部旋转角度(°)']['max']}°，平均值为 {stats['肩部旋转角度(°)']['mean']:.2f}°")
-        st.write(f"- 肩部外展角度的标准差为 {stats['肩部外展角度(°)']['std']:.2f}，波动较 {'大' if stats['肩部外展角度(°)']['std'] > 15 else '小'}。")
+    # 按工站汇总计算
+    def summarize_by_station(data):
+        st.write("### 1.2  数据统计分析")
+    
+        # 按 '工站(w)' 分组并计算统计特性
+        station_summary = data.groupby('工站(w)').agg({
+            '时间(s)': ['count'],
+            '颈部角度(°)': ['mean', 'min', 'max', 'std'],
+            '肩部前屈角度(°)': ['mean', 'min', 'max', 'std'],
+            '肩部外展角度(°)': ['mean', 'min', 'max', 'std']
+        })
+
+        # 调整列名格式
+        station_summary.columns = ['_'.join(col).strip() for col in station_summary.columns.values]
+        station_summary.reset_index(inplace=True)
+
+        # 限制小数点位数为最多2位
+        station_summary = station_summary.round(2)
+  
+        # 显示汇总统计结果
+        st.write(station_summary)
+
+    # 调用函数
+    summarize_by_station(data)
 
     # 3D 散点图
     def generate_3d_scatter(data):
         st.write("### 2.1  肩颈角度3D可视化散点图")
-        fig = plt.figure(figsize=(10, 7))
-        ax = fig.add_subplot(111, projection='3d')
-        scatter = ax.scatter(data['时间(s)'], data['颈部角度(°)'], data['肩部旋转角度(°)'], c=data['肩部外展角度(°)'], cmap='viridis')
-        ax.set_xlabel('时间(s)', fontproperties=simhei_font)
-        ax.set_ylabel('颈部角度(°)', fontproperties=simhei_font)
-        ax.set_zlabel('肩部旋转角度(°)', fontproperties=simhei_font)
-        plt.title('肩颈角度3D可视化散点图', fontproperties=simhei_font)
-
-        # 修改 colorbar 的 label 字体
-        cbar = fig.colorbar(scatter, ax=ax)
-        cbar.set_label('肩部外展角度(°)', fontproperties=simhei_font)
+    
+    # 按 '工站(w)' 分组
+        grouped = data.groupby('工站(w)')
+    
+    # 遍历每个工站的数据
+        for station, group_data in grouped:
+            st.write(f"#### 工站 {station} 的3D散点图")
         
-        st.pyplot(fig)
+        # 创建图形
+            fig = plt.figure(figsize=(10, 7))
+            ax = fig.add_subplot(111, projection='3d')
         
-        # 3D 散点图分析结论
-        st.write("\n**动态分析结论：3D可视化散点图**")
-        if data['颈部角度(°)'].max() > 40:
-            st.write("- 部分时间点颈部角度超过 40°，可能存在极端动作。")
+        # 绘制散点图
+            scatter = ax.scatter(
+                group_data['时间(s)'], 
+                group_data['颈部角度(°)'], 
+                group_data['肩部前屈角度(°)'], 
+                c=group_data['肩部外展角度(°)'], 
+                cmap='viridis'
+            )
+        
+        # 设置坐标轴标签
+            ax.set_xlabel('时间(s)', fontproperties=simhei_font)
+            ax.set_ylabel('颈部角度(°)', fontproperties=simhei_font)
+            ax.set_zlabel('肩部前屈角度(°)', fontproperties=simhei_font)
+        
+        # 设置标题
+            plt.title(f'工站 {station} 肩颈角度3D可视化散点图', fontproperties=simhei_font)
+        
+        # 添加 colorbar
+            cbar = fig.colorbar(scatter, ax=ax)
+            cbar.set_label('肩部外展角度(°)', fontproperties=simhei_font)
+        
+        # 显示图形
+            st.pyplot(fig)
+        
+        # 动态分析结论
+            st.write(f"**工站 {station} 的动态分析结论：**")
+            neck_Flexion_max = group_data['颈部角度(°)'].max()
+            if neck_Flexion_max < 20:
+                st.write("- 作业时颈部角度处于20°之内，MSD风险较低。")
+            elif 20 <= neck_Flexion_max <= 40:
+                st.write("- 部分时间点颈部角度超过20°，存在一定的MSD风险。")
+            else:
+                st.write("- 部分时间点颈部角度超过40°，请注意可能存在极端低头动作。")
+        
+            shoulder_Flexion_max = group_data['肩部前屈角度(°)'].max()
+            if shoulder_Flexion_max < 15:
+                st.write("- 肩部前屈角度的波动较小，动作幅度相对一致。")
+            elif shoulder_Flexion_max >= 45:
+                st.write("- 部分时间点肩部前屈角度大于45°，请注意作业时是否有手部支撑。")
 
-        shoulder_rotation_std = data['肩部旋转角度(°)'].std()
-        if shoulder_rotation_std < 10:
-            st.write("- 肩部旋转角度的波动较小，动作幅度相对一致。")
-        elif 10 <= shoulder_rotation_std <= 15:
-            st.write("- 肩部旋转角度的波动性适中，可能动作较为稳定。")
-        else:
-            st.write("- 肩部旋转角度的波动性较大，动作可能不稳定。")
+            if group_data['肩部外展角度(°)'].mean() > 20:
+                st.write("- 肩部外展角度的整体幅度较大，上臂作业时运动强度可能较高。")
 
-        if data['肩部外展角度(°)'].mean() > 20:
-            st.write("- 肩部外展角度的整体幅度较大，运动强度可能较高。")
+    # 调用函数
+    generate_3d_scatter(data)
 
     # 相关性热力图
     def generate_correlation_heatmap(data):
         st.write("### 2.2 肩颈角度相关性热力图")
-
-        # 计算相关性矩阵
-        corr = data[['颈部角度(°)', '肩部前屈角度(°)', '肩部外展角度(°)', '肩部旋转角度(°)']].corr()
-
-        # 创建绘图
-        fig, ax = plt.subplots(figsize=(8, 6))
-        sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', cbar=True, ax=ax)
-
-        # 设置标题和坐标轴字体
-        ax.set_title('肩颈角度相关性热力图', fontproperties=simhei_font)
-        ax.set_xticklabels(ax.get_xticklabels(), fontproperties=simhei_font, fontsize=8)
-        ax.set_yticklabels(ax.get_yticklabels(), fontproperties=simhei_font, fontsize=8)
-
-        # 渲染图表到 Streamlit
-        st.pyplot(fig)
-
-        # 相关性热力图分析结论
-        st.write("\n**动态分析结论：相关性热力图**")
+    
+        # 按 '工站(w)' 分组
+        grouped = data.groupby('工站(w)')
+    
+        # 遍历每个工站的数据
+        for station, group_data in grouped:
+            st.write(f"#### 工站 {station} 的相关性热力图")
         
-         # 分析颈部角度和肩部前屈角度
-        if corr['颈部角度(°)']['肩部前屈角度(°)'] > 0.5:
-            st.write("- 颈部角度与肩部前屈角度高度正相关，动作之间可能存在协同性。")
-        elif 0 < corr['颈部角度(°)']['肩部前屈角度(°)'] <= 0.5:
-            st.write("- 颈部角度与肩部前屈角度存在一定程度的正相关，但相关性较弱，协同性可能较低。")
+            # 计算相关性矩阵（移除肩部旋转角度）
+            corr = group_data[['颈部角度(°)', '肩部前屈角度(°)', '肩部外展角度(°)']].corr()
+ 
+            # 创建绘图
+            fig, ax = plt.subplots(figsize=(8, 6))
+            sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', cbar=True, ax=ax)
 
-        # 分析颈部角度和肩部外展角度
-        if corr['颈部角度(°)']['肩部外展角度(°)'] > 0.5:
-            st.write("- 颈部角度与肩部外展角度高度正相关，表明两者可能存在较强的协同动作趋势。")
-        elif 0 < corr['颈部角度(°)']['肩部外展角度(°)'] <= 0.5:
-            st.write("- 颈部角度与肩部外展角度存在一定程度的正相关，但相关性较弱，协同性可能较低。")
-        elif corr['颈部角度(°)']['肩部外展角度(°)'] < 0:
-            st.write("- 颈部角度与肩部外展角度呈负相关，可能表现为动作补偿或反向趋势。")
+            # 设置标题和坐标轴字体
+            ax.set_title(f'工站 {station} 的肩颈角度相关性热力图', fontproperties=simhei_font)
+            ax.set_xticklabels(ax.get_xticklabels(), fontproperties=simhei_font, fontsize=8)
+            ax.set_yticklabels(ax.get_yticklabels(), fontproperties=simhei_font, fontsize=8)
 
-        # 分析颈部角度和肩部旋转角度
-        if corr['颈部角度(°)']['肩部旋转角度(°)'] > 0.5:
-            st.write("- 颈部角度与肩部旋转角度高度正相关，表明两者可能同时参与复杂的联合动作。")
-        elif 0 < corr['颈部角度(°)']['肩部旋转角度(°)'] <= 0.5:
-            st.write("- 颈部角度与肩部旋转角度存在一定程度的正相关，但相关性较弱，协同性可能较低。")
-        elif corr['颈部角度(°)']['肩部旋转角度(°)'] < 0:
-            st.write("- 颈部角度与肩部旋转角度呈负相关，可能与补偿动作或对立机制有关。")
+            # 渲染图表到 Streamlit
+            st.pyplot(fig)
+        
+            # 分析动态结论
+            st.write(f"**工站 {station} 的动态分析结论：**")
+        
+            # 分析颈部角度和肩部前屈角度
+            if corr.loc['颈部角度(°)', '肩部前屈角度(°)'] > 0.5:
+                st.write("- 颈部角度与肩部前屈角度高度正相关，动作之间可能存在协同性。")
+            elif 0 < corr.loc['颈部角度(°)', '肩部前屈角度(°)'] <= 0.5:
+                st.write("- 颈部角度与肩部前屈角度存在一定程度的正相关，但相关性较弱，协同性可能较低。")
 
-        # 分析肩部旋转角度和肩部外展角度
-        if corr['肩部旋转角度(°)']['肩部外展角度(°)'] < 0:
-            st.write("- 肩部旋转与外展角度存在负相关，可能是补偿动作的表现。")
-        elif 0 <= corr['肩部旋转角度(°)']['肩部外展角度(°)'] <= 0.5:
-            st.write("- 肩部旋转与外展角度存在弱正相关，可能与动作的协调性有关，但关联较弱。")
-        elif corr['肩部旋转角度(°)']['肩部外展角度(°)'] > 0.5:
-            st.write("- 肩部旋转与外展角度高度正相关，表明动作之间可能存在强协同趋势。")
+            # 分析颈部角度和肩部外展角度
+            if corr.loc['颈部角度(°)', '肩部外展角度(°)'] > 0.5:
+                st.write("- 颈部角度与肩部外展角度高度正相关，表明两者可能存在较强的协同动作趋势。")
+            elif 0 < corr.loc['颈部角度(°)', '肩部外展角度(°)'] <= 0.5:
+                st.write("- 颈部角度与肩部外展角度存在一定程度的正相关，但相关性较弱，协同性可能较低。")
+            elif corr.loc['颈部角度(°)', '肩部外展角度(°)'] < 0:
+                st.write("- 颈部角度与肩部外展角度呈负相关，可能表现为动作补偿或反向趋势。")
+
+    # 调用函数生成图和结论
+    generate_correlation_heatmap(data)
             
-    # 肩颈角度时间变化散点图
-    def generate_scatter_plots(data):
-        st.write("### 2.3  肩颈角度时间变化散点图")
+    # 肩颈角度时间变化折线图（带水平预警线）
+    def generate_line_plots_with_threshold(data):
+        st.write("### 2.3 肩颈角度时间变化折线图")
+    
+        # 按 '工站(w)' 分组
+        grouped = data.groupby('工站(w)')
+    
+        # 遍历每个工站的数据
+        for station, group_data in grouped:
+            st.write(f"#### 工站 {station} 的肩颈角度时间变化折线图")
         
-        # 绘制图像
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.scatter(data['时间(s)'], data['颈部角度(°)'], label='颈部角度(°)', alpha=0.7)
-        ax.scatter(data['时间(s)'], data['肩部旋转角度(°)'], label='肩部旋转角度(°)', alpha=0.7)
-        ax.set_xlabel('时间(s)', fontproperties=simhei_font, fontsize=12)
-        ax.set_ylabel('角度(°)', fontproperties=simhei_font, fontsize=12)
-        ax.set_title('肩颈角度时间变化散点图', fontproperties=simhei_font, fontsize=12)
-
-        # 设置图例字体
-        legend = ax.legend(prop=simhei_font)  # 图例字体设置为 simhei
+            # 绘制图像
+            fig, ax = plt.subplots(figsize=(10, 6))
         
-        # 用 st.pyplot() 嵌入图像
-        st.pyplot(fig)
+            # 绘制折线图
+            ax.plot(group_data['时间(s)'], group_data['颈部角度(°)'], label='颈部角度(°)', color='blue', linewidth=2)
+            ax.plot(group_data['时间(s)'], group_data['肩部前屈角度(°)'], label='肩部前屈角度(°)', color='green', linewidth=2)
         
-        # 散点图动态结论
-        st.write("\n**动态分析结论：散点图**")
-
-        # 对 颈部角度(°) 的分析
-        neck_mean = data['颈部角度(°)'].mean()
-        if neck_mean > 20:
-            st.write("- 颈部角度的整体水平较高，可能是头部前倾较多导致的。")
-        elif 10 <= neck_mean <= 20:
-            st.write("- 颈部角度处于中等水平，动作姿势可能较为自然。")
-        else:
-            st.write("- 颈部角度较低，头部可能偏后或抬头动作较多。")
-
-        # 对 肩部旋转角度(°) 的分析（统一标准差逻辑）
-        shoulder_rotation_std = data['肩部旋转角度(°)'].std()
-        if shoulder_rotation_std < 10:
-            st.write("- 肩部旋转角度的波动较小，动作幅度相对一致。")
-        elif 10 <= shoulder_rotation_std <= 15:
-            st.write("- 肩部旋转角度的波动性适中，可能动作较为稳定。")
-        else:
-            st.write("- 肩部旋转角度的波动性较大，动作可能不稳定。")         
-
-    # 综合分析
-    def comprehensive_analysis(data, model):
-        neck_threshold = data['颈部角度(°)'].mean() + data['颈部角度(°)'].std()
-        shoulder_threshold = data['肩部旋转角度(°)'].mean() + data['肩部旋转角度(°)'].std()
-
-        st.write("### 3.1  AI模型综合分析结果")
-        st.write(f"- **动态阈值**：颈部角度 > {neck_threshold:.2f}° 为异常")
-        st.write(f"- **动态阈值**：肩部旋转 > {shoulder_threshold:.2f}° 为异常")
-
-        feature_importances = model.feature_importances_
-        st.write("#### 3.2  机器学习特征重要性")
-        for name, importance in zip(data.columns[2:], feature_importances):
-            st.write(f"- {name}: {importance:.4f}")
-
-        abnormal_indices = []
-        st.write("### 3.3  作业姿势AI模型检测结果")
-
-        # 前10条
-        st.write("#### 前10条检测结果：")
-        for index, row in data.iloc[:10].iterrows():
-            rule_based_conclusion = "正常"
-            if row['颈部角度(°)'] > neck_threshold:
-                rule_based_conclusion = "颈部角度异常"
-            elif row['肩部旋转角度(°)'] > shoulder_threshold:
-                rule_based_conclusion = "肩部旋转角度异常"
-
-            ml_conclusion = "异常" if model.predict([[row['颈部角度(°)'], row['肩部前屈角度(°)'], 
-                                                      row['肩部外展角度(°)'], row['肩部旋转角度(°)']]])[0] == 1 else "正常"
-
-            if rule_based_conclusion == "正常" and ml_conclusion == "异常":
-                st.write(f"- 第 {index+1} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
-                abnormal_indices.append(index)
-            elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
-                st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
-                abnormal_indices.append(index)
-            elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
-                st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
-                abnormal_indices.append(index)
+            # 添加水平预警线
+            ax.axhline(y=20, color='red', linestyle='--', linewidth=1.5, label='颈部角度预警线 (20°)')
+            ax.axhline(y=45, color='orange', linestyle='--', linewidth=1.5, label='肩部前屈角度预警线 (45°)')
+        
+            # 设置坐标轴和标题
+            ax.set_xlabel('时间(s)', fontproperties=simhei_font, fontsize=12)
+            ax.set_ylabel('角度(°)', fontproperties=simhei_font, fontsize=12)
+            ax.set_title(f'工站 {station} 的肩颈角度时间变化折线图', fontproperties=simhei_font, fontsize=12)
+        
+            # 设置图例
+            ax.legend(prop=simhei_font, fontsize=10)  # 图例字体设置为 simhei
+        
+            # 渲染图像
+            st.pyplot(fig)
+        
+            # 动态分析结论
+            st.write(f"**工站 {station} 的动态分析结论：**")
+        
+            # 颈部角度分析
+            neck_exceed_count = (group_data['颈部角度(°)'] > 20).sum()
+            total_time_points = len(group_data)  # 总时间点数
+            neck_exceed_ratio = neck_exceed_count / total_time_points  # 超过 20° 的时间点占比
+            
+            if neck_exceed_count > 0:
+                # 初始化变量，确保在所有条件下都有值
+                neck_risk_level = "轻度"
+                neck_color = "black"
+                
+                # 根据占比分类 MSD 风险等级
+                if neck_exceed_ratio > 0.5:
+                    risk_level = "较高"
+                    neck_color = "red"
+                elif neck_exceed_ratio >= 0.25:
+                    risk_level = "中等"
+                    neck_color = "orange"
+            
+                st.markdown(f"<span style='color:{neck_color};'>- 有 {neck_exceed_count} 个时间点颈部角度超过 20°，占比 {neck_exceed_ratio:.2%}，颈部存在 {neck_risk_level} MSD 风险。</span>", unsafe_allow_html=True)
             else:
-                st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
-
-        # 中间数据折叠
-        if len(data) > 15:
-            st.write(f"#### 中间检测结果：")
-
-            with st.expander("展开查看中间检测结果"):
-                for index, row in data.iloc[10:-5].iterrows():
-                    rule_based_conclusion = "正常"
-                    if row['颈部角度(°)'] > neck_threshold:
-                        rule_based_conclusion = "颈部角度异常"
-                    elif row['肩部旋转角度(°)'] > shoulder_threshold:
-                        rule_based_conclusion = "肩部旋转角度异常"
-
-                    ml_conclusion = "异常" if model.predict([[row['颈部角度(°)'], row['肩部前屈角度(°)'], 
-                                                              row['肩部外展角度(°)'], row['肩部旋转角度(°)']]])[0] == 1 else "正常"
-
-                    if rule_based_conclusion == "正常" and ml_conclusion == "异常":
-                        st.write(f"- 第 {index+1} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
-                        abnormal_indices.append(index)
-                    elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
-                        st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
-                        abnormal_indices.append(index)
-                    elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
-                        st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
-                        abnormal_indices.append(index)
-                    else:
-                        st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
+                st.write("-作业时颈部角度未超过20°，MSD风险较低。")
         
-        # 后5条
-        st.write("#### 后5条检测结果：")
-        for index, row in data.iloc[-5:].iterrows():
-            rule_based_conclusion = "正常"
-            if row['颈部角度(°)'] > neck_threshold:
-                rule_based_conclusion = "颈部角度异常"
-            elif row['肩部旋转角度(°)'] > shoulder_threshold:
-                rule_based_conclusion = "肩部旋转角度异常"
+            # 肩部前屈角度分析
+            shoulder_exceed_count = (group_data['肩部前屈角度(°)'] > 45).sum()
+            shoulder_exceed_ratio = shoulder_exceed_count / total_time_points  # 超过 45° 的时间点占比
 
-            ml_conclusion = "异常" if model.predict([[row['颈部角度(°)'], row['肩部前屈角度(°)'], 
-                                                      row['肩部外展角度(°)'], row['肩部旋转角度(°)']]])[0] == 1 else "正常"
-
-            if rule_based_conclusion == "正常" and ml_conclusion == "异常":
-                st.write(f"- 第 {index+1} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
-                abnormal_indices.append(index)
-            elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
-                st.write(f"- 第 {index+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
-                abnormal_indices.append(index)
-            elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
-                st.write(f"- 第 {index+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
-                abnormal_indices.append(index)
+            if shoulder_exceed_count > 0:
+                # 初始化变量，确保在所有条件下都有值
+                shoulder_risk_level = "轻度"
+                shoulder_color = "black"
+                
+                # 根据占比分类 MSD 风险等级
+                if shoulder_exceed_ratio > 0.5:
+                    shoulder_risk_level = "较高"
+                    shoulder_color = "red"
+                elif shoulder_exceed_ratio >= 0.25:
+                    shoulder_risk_level = "中等"
+                    shoulder_color = "orange"
+            
+                st.markdown(f"<span style='color:{shoulder_color};'>- 有 {shoulder_exceed_count} 个时间点肩部前屈角度超过 45°，占比 {shoulder_exceed_ratio:.2%}，肩部存在 {shoulder_risk_level} MSD 风险。</span>", unsafe_allow_html=True)
             else:
-                st.write(f"- 第 {index+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
+                st.write("-作业时肩部前屈角度未超过45°，动作幅度较为自然，MSD风险较低。")
+                
+    # 调用函数生成图和结论
+    generate_line_plots_with_threshold(data)
 
-        return abnormal_indices
+     # 综合分析
+    def comprehensive_analysis_by_workstation(data, model):
+
+        st.write("### 3.1  机器学习AI模型分析结果")
+        
+        # 按 '工站(w)' 分组
+        grouped = data.groupby('工站(w)')
+
+        # 用于记录所有工站的异常索引
+        total_abnormal_indices = []
+    
+        # 遍历每个工站的数据
+        for station, group_data in grouped:
+            st.write(f"#### 工站{station}的AI模型分析结果")
+        
+           # 动态阈值计算
+            neck_threshold = group_data['颈部角度(°)'].mean() + group_data['颈部角度(°)'].std()
+            shoulder_threshold = group_data['肩部前屈角度(°)'].mean() + group_data['肩部前屈角度(°)'].std()
+
+            # 输出动态阈值
+            st.write(f"- **动态阈值**：颈部角度 > {neck_threshold:.2f}° 为异常")
+            st.write(f"- **动态阈值**：肩部前屈 > {shoulder_threshold:.2f}° 为异常")
+
+            # 特征重要性
+            st.write("##### 机器学习特征重要性")
+            feature_importances = model.feature_importances_
+            for name, importance in zip(group_data.columns[2:], feature_importances):
+                st.write(f"- {name}: {importance:.4f}")
+
+            # 重置序号
+            group_data = group_data.reset_index(drop=True)     
+            
+            # AI模型检测结果
+            abnormal_indices = []
+            st.write(f"##### 工站{station}的逐条数据AI分析检测结果")
+        
+            # 前5条
+            st.write(f"###### 工站{station}的前5条数据检测结果：")
+            for i, row in group_data.iloc[:5].iterrows():
+                rule_based_conclusion = "正常"
+                if row['颈部角度(°)'] > neck_threshold:
+                    rule_based_conclusion = "颈部角度异常"
+                elif row['肩部前屈角度(°)'] > shoulder_threshold:
+                    rule_based_conclusion = "肩部前屈角度异常"
+
+                ml_conclusion = "异常" if model.predict([[row['颈部角度(°)'], row['肩部前屈角度(°)'], 
+                                                          row['肩部外展角度(°)']]])[0] == 1 else "正常"
+
+                if rule_based_conclusion == "正常" and ml_conclusion == "异常":
+                    st.write(f"- 第 {i+1} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
+                    abnormal_indices.append(i)
+                elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
+                    st.write(f"- 第 {i+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
+                    abnormal_indices.append(i)
+                elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
+                    st.write(f"- 第 {i+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
+                    abnormal_indices.append(i)
+                else:
+                    st.write(f"- 第 {i+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
+        
+            # 中间数据折叠
+            if len(group_data) > 10:
+                st.write(f"###### 工站{station}的中间数据检测结果：")
+                with st.expander(f"展开查看工站{station}的中间数据检测结果"):
+                    for i, row in group_data.iloc[5:-5].iterrows():
+                        rule_based_conclusion = "正常"
+                        if row['颈部角度(°)'] > neck_threshold:
+                            rule_based_conclusion = "颈部角度异常"
+                        elif row['肩部前屈角度(°)'] > shoulder_threshold:
+                            rule_based_conclusion = "肩部前屈角度异常"
+
+                        ml_conclusion = "异常" if model.predict([[row['颈部角度(°)'], row['肩部前屈角度(°)'], 
+                                                              row['肩部外展角度(°)']]])[0] == 1 else "正常"
+
+                        if rule_based_conclusion == "正常" and ml_conclusion == "异常":
+                            st.write(f"- 第 {i+1} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
+                            abnormal_indices.append(i)
+                        elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
+                            st.write(f"- 第 {i+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
+                            abnormal_indices.append(i)
+                        elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
+                            st.write(f"- 第 {i+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
+                            abnormal_indices.append(i)
+                        else:
+                            st.write(f"- 第 {i+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
+        
+            # 后5条
+            st.write(f"###### 工站{station}的后5条数据检测结果：")
+            for i, row in group_data.iloc[-5:].iterrows():
+                rule_based_conclusion = "正常"
+                if row['颈部角度(°)'] > neck_threshold:
+                    rule_based_conclusion = "颈部角度异常"
+                elif row['肩部前屈角度(°)'] > shoulder_threshold:
+                    rule_based_conclusion = "肩部前屈角度异常"
+
+                ml_conclusion = "异常" if model.predict([[row['颈部角度(°)'], row['肩部前屈角度(°)'], 
+                                                          row['肩部外展角度(°)']]])[0] == 1 else "正常"
+
+                if rule_based_conclusion == "正常" and ml_conclusion == "异常":
+                    st.write(f"- 第 {i+1} 条数据：机器学习检测为异常姿势，但规则未发现，建议进一步分析。")
+                    abnormal_indices.append(i)
+                elif rule_based_conclusion != "正常" and ml_conclusion == "异常":
+                    st.write(f"- 第 {i+1} 条数据：规则与机器学习一致检测为异常姿势，问题可能较严重。")
+                    abnormal_indices.append(i)
+                elif rule_based_conclusion != "正常" and ml_conclusion == "正常":
+                    st.write(f"- 第 {i+1} 条数据：规则检测为异常姿势，但机器学习未检测为异常，建议评估规则的适用性。")
+                    abnormal_indices.append(i)
+                else:
+                    st.write(f"- 第 {i+1} 条数据：规则和机器学习均检测为正常姿势，无明显问题。")
+    
+            # 总结性描述
+            if abnormal_indices:
+                st.write(f"##### 工站{station}总结：AI模型共检测到 {len(abnormal_indices)} 条异常数据。")
+            else:
+                st.write(f"##### 工站{station}总结：AI模型未检测到异常数据。")
+        
+             # 记录工站异常数据索引
+            total_abnormal_indices.extend(abnormal_indices)
+        
+        # 返回所有工站的异常数据索引
+        return total_abnormal_indices
   
     # 机器学习
     if uploaded_file is not None:
+        # 增加延迟
+        time.sleep(1)
+        
         # 下载最新模型
         model_path = download_latest_model_from_github()
 
@@ -362,9 +470,9 @@ if uploaded_file is not None:
     else:
         model = RandomForestClassifier(random_state=42)
         st.write("未加载到模型，训练新模型...")
-
+    
     # 模型训练或重新训练
-    X = data[['颈部角度(°)', '肩部前屈角度(°)', '肩部外展角度(°)', '肩部旋转角度(°)']]
+    X = data[['颈部角度(°)', '肩部前屈角度(°)', '肩部外展角度(°)']]
     if 'Label' not in data.columns:
         np.random.seed(42)
         data['Label'] = np.random.choice([0, 1], size=len(data))
@@ -377,60 +485,9 @@ if uploaded_file is not None:
     model.fit(X_train, y_train)   
     y_pred = (model.predict_proba(X_test)[:, 1] >= 0.4).astype(int)
     y_prob = model.predict_proba(X_test)[:, 1]
-               
+
     # 调用函数生成图和结论
-    analyze_data(data)
-    generate_3d_scatter(data)
-    generate_correlation_heatmap(data)
-    generate_scatter_plots(data)
-    abnormal_indices = comprehensive_analysis(data, model)
-    
-    if abnormal_indices:
-        st.write(f"#### AI模型共检测到 {len(abnormal_indices)} 条异常数据")
-    else:
-        st.write("AI模型未检测到异常数据。")
-                               
-    st.write("### 3.4  AI模型质量评估")
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-    y_pred = (model.predict_proba(X_test)[:, 1] >= 0.4).astype(int)
-    y_prob = model.predict_proba(X_test)[:, 1]
-    fpr, tpr, thresholds = roc_curve(y_test, y_prob)
-    roc_auc = auc(fpr, tpr)
-
-    fig, ax = plt.subplots(figsize=(8, 6))
-
-    # 绘制ROC曲线
-    ax.plot(fpr, tpr, label=f'AUC = {roc_auc:.2f}', linestyle='-')
-    ax.plot([0, 1], [0, 1], 'r--', label="随机模型")
-
-    # 找到最佳阈值的坐标
-    best_threshold_index = (tpr - fpr).argmax()
-    best_threshold = thresholds[best_threshold_index]
-    best_fpr = fpr[best_threshold_index]
-    best_tpr = tpr[best_threshold_index]
-
-    # 在ROC曲线上标注最佳阈值点
-    ax.scatter(best_fpr, best_tpr, color='red', label=f'最佳阈值: {best_threshold:.2f}')
-    ax.annotate(f'({best_fpr:.2f}, {best_tpr:.2f})',
-                xy=(best_fpr, best_tpr),
-                xytext=(best_fpr - 0.2, best_tpr - 0.1),
-                arrowprops=dict(facecolor='red', arrowstyle='->'),
-                fontsize=10,
-                fontproperties=simhei_font)
-
-    # 设置标题和轴标签
-    ax.set_xlabel('假阳性率', fontproperties=simhei_font)
-    ax.set_ylabel('真阳性率', fontproperties=simhei_font)
-    ax.set_title('ROC曲线', fontproperties=simhei_font)
-
-    # 添加图例，显式设置字体
-    ax.legend(loc='lower right', prop=simhei_font)
-
-    # 在Streamlit中显示图像
-    st.pyplot(fig)
-     
-    st.write("\n**AI模型优化建议**")
-    st.write(f"AI模型AUC值为 {roc_auc:.2f}，最佳阈值为 {best_threshold:.2f}，可根据此阈值优化AI模型。")
+    total_abnormal_indices = comprehensive_analysis_by_workstation(data, model)
     
     # 保存新模型到临时文件夹
     local_model_path = f"/tmp/{model_filename}"
